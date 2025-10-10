@@ -49,8 +49,10 @@ const Contact: React.FC = () => {
   return (
     <div className='contact'>
       <section className='contact-header'>
-        <h1>Nous Contacter</h1>
-        <p>Une question ? N'hésitez pas à nous écrire</p>
+        <div className='header-content'>
+          <h1>Nous Contacter</h1>
+          <p>Une question ? N'hésitez pas à nous écrire</p>
+        </div>
       </section>
 
       <section className='contact-content'>

@@ -1,15 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 50;
+      setIsScrolled(scrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className='navbar'>
+    <nav className={`topbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className='navbar-container'>
         <Link to='/' className='navbar-logo'>
-          Auto Aziz
+          ✨ Auto Aziz
         </Link>
         <ul className='navbar-menu'>
           <li className={location.pathname === '/' ? 'active' : ''}>
