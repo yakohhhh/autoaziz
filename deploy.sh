@@ -9,7 +9,6 @@ set -e
 PROJECT_DIR="/opt/autoaziz"
 BACKUP_DIR="/opt/backups/autoaziz"
 LOG_FILE="/var/log/autoaziz-deploy.log"
-SLACK_WEBHOOK_URL="$SLACK_WEBHOOK_URL"
 
 # Couleurs pour les logs
 RED='\033[0;31m'
@@ -35,16 +34,10 @@ log_warning() {
     echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] ⚠️ $1${NC}" | tee -a $LOG_FILE
 }
 
-# Fonction de notification Slack
+# Fonction de notification Slack (désactivée)
 notify_slack() {
-    local message="$1"
-    local color="$2"
-    
-    if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
-        curl -X POST -H 'Content-type: application/json' \
-            --data "{\"attachments\":[{\"color\":\"$color\",\"text\":\"🚗 Auto Aziz: $message\"}]}" \
-            "$SLACK_WEBHOOK_URL" || true
-    fi
+    # Notification Slack désactivée - supprimée à la demande
+    return 0
 }
 
 # Fonction de backup

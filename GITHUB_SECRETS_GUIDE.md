@@ -41,19 +41,6 @@ Exemple: root ou ubuntu ou aziz
 
 ---
 
-## 📊 **SECRETS DE MONITORING (Optionnels)**
-
-### 💬 **SLACK_WEBHOOK** 
-```
-URL du webhook Slack pour les notifications de déploiement
-```
-**Comment l'obtenir :**
-1. Créez une app Slack
-2. Ajoutez un Incoming WebHook
-3. Copiez l'URL fournie
-
----
-
 ## 🔧 **CONFIGURATION SIMPLIFIÉE**
 
 Si vous voulez **juste les tests et builds** (sans déploiement), voici une version simplifiée de la CI/CD :

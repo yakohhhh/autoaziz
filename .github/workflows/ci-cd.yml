@@ -212,19 +212,3 @@ jobs:
         run: |
           sleep 30
           curl -f https://autoaziz.com/health || exit 1
-
-  # 📢 Notifications
-  notify:
-    name: 📢 Notify Team
-    runs-on: ubuntu-latest
-    needs: [deploy]
-    if: always()
-
-    steps:
-      - name: 📢 Slack Notification
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#deployments'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow

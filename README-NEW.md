@@ -185,7 +185,6 @@ GITHUB_TOKEN: ghp_xxx...
 SSH_PRIVATE_KEY: -----BEGIN OPENSSH PRIVATE KEY-----
 HOST: votre-serveur.com
 USERNAME: autoaziz
-SLACK_WEBHOOK: https://hooks.slack.com/...
 ```
 
 ### **🎯 Webhook GitHub**
