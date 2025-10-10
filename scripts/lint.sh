@@ -43,12 +43,12 @@ print_info() {
 lint_backend() {
     print_header "🔧 ESLINT BACKEND"
     
-    if [ ! -d "backend" ]; then
-        print_error "Dossier backend non trouvé"
+    if [ ! -d "apps/backend" ]; then
+        print_error "Dossier apps/backend non trouvé"
         return 1
     fi
     
-    cd backend
+    cd apps/backend
     
     if [ "$1" = "--fix" ]; then
         print_info "Correction automatique des erreurs backend..."
@@ -58,7 +58,7 @@ lint_backend() {
         npm run lint:check || true
     fi
     
-    cd ..
+    cd ../..
     print_success "ESLint backend terminé"
 }
 
@@ -68,12 +68,12 @@ lint_backend() {
 lint_frontend() {
     print_header "⚛️ ESLINT FRONTEND"
     
-    if [ ! -d "frontend" ]; then
-        print_error "Dossier frontend non trouvé"
+    if [ ! -d "apps/frontend" ]; then
+        print_error "Dossier apps/frontend non trouvé"
         return 1
     fi
     
-    cd frontend
+    cd apps/frontend
     
     if [ "$1" = "--fix" ]; then
         print_info "Correction automatique des erreurs frontend..."
@@ -83,7 +83,7 @@ lint_frontend() {
         npm run lint:check || true
     fi
     
-    cd ..
+    cd ../..
     print_success "ESLint frontend terminé"
 }
 

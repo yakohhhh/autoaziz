@@ -1,197 +1,151 @@
-# Auto Aziz - Site Vitrine de Contrôle Technique Automobile
+# 🚗 Auto Aziz - Système de Prise de Rendez-vous
 
-Un site web moderne et responsive pour un centre de contrôle technique automobile, développé avec React (frontend) et NestJS (backend).
+> Plateforme moderne de gestion de rendez-vous pour garage automobile avec vérification par email/SMS et interface cartographique.
 
-## 🚀 Fonctionnalités
-
-### Frontend (React + TypeScript)
-- **Design moderne et responsive** - Compatible mobile et desktop
-- **Pages principales** :
-  - 🏠 Accueil - Présentation de l'entreprise
-  - 🔧 Services - Liste des services proposés
-  - 💰 Tarifs - Grille tarifaire transparente
-  - 📅 Rendez-vous - Système de prise de rendez-vous en ligne
-  - 📍 Contact - Formulaire de contact et carte interactive
-- **Carte interactive** avec React-Leaflet
-- **Formulaires sécurisés** avec validation
-- **Informations claires** : adresse, horaires, téléphone
-
-### Backend (NestJS + PostgreSQL)
-- **API REST** avec documentation Swagger automatique
-- **Gestion des contacts** - Stockage et notification par email
-- **Gestion des rendez-vous** - Système de réservation
-- **Emails automatiques** - Confirmations pour clients et notifications admin
-- **Base de données PostgreSQL** avec TypeORM
-- **Architecture modulaire** et évolutive
-- **Validation des données** avec class-validator
-
-## 📋 Prérequis
-
-- Node.js (v16 ou supérieur)
-- npm ou yarn
-- PostgreSQL (ou Docker pour utiliser docker-compose)
-
-## 🛠️ Installation
-
-### 1. Cloner le repository
-```bash
-git clone https://github.com/yakohhhh/autoaziz.git
-cd autoaziz
-```
-
-### 2. Configuration de la base de données
-
-**Option A : Avec Docker (recommandé)**
-```bash
-docker-compose up -d
-```
-
-**Option B : PostgreSQL local**
-- Installer PostgreSQL
-- Créer une base de données nommée `autoaziz`
-
-### 3. Configuration du Backend
-
-```bash
-cd backend
-npm install
-```
-
-Créer un fichier `.env` :
-```env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_DATABASE=autoaziz
-
-# Email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-password
-SMTP_FROM=noreply@autoaziz.com
-
-# Application
-PORT=3001
-NODE_ENV=development
-```
-
-Démarrer le backend :
-```bash
-npm run start:dev
-```
-
-Le backend sera accessible sur http://localhost:3001
-La documentation Swagger sur http://localhost:3001/api
-
-### 4. Configuration du Frontend
-
-```bash
-cd ../frontend
-npm install
-```
-
-Démarrer le frontend :
-```bash
-npm start
-```
-
-Le frontend sera accessible sur http://localhost:3000
-
-## 📚 Documentation API
-
-La documentation Swagger est disponible à l'adresse : http://localhost:3001/api
-
-### Endpoints principaux
-
-#### Contacts
-- `POST /contacts` - Créer un nouveau message de contact
-- `GET /contacts` - Liste tous les messages
-- `GET /contacts/:id` - Détails d'un message
-
-#### Rendez-vous
-- `POST /appointments` - Créer un nouveau rendez-vous
-- `GET /appointments` - Liste tous les rendez-vous
-- `GET /appointments/:id` - Détails d'un rendez-vous
-- `PATCH /appointments/:id/status` - Mettre à jour le statut
-
-## 🏗️ Structure du Projet
+## 📁 Structure du projet
 
 ```
 autoaziz/
-├── backend/                 # Application NestJS
-│   ├── src/
-│   │   ├── appointments/   # Module rendez-vous
-│   │   ├── contacts/       # Module contacts
-│   │   ├── email/          # Service email
-│   │   ├── entities/       # Entités TypeORM
-│   │   ├── dto/            # DTOs de validation
-│   │   └── main.ts         # Point d'entrée
-│   └── package.json
-│
-├── frontend/               # Application React
-│   ├── src/
-│   │   ├── components/    # Composants réutilisables
-│   │   ├── pages/         # Pages de l'application
-│   │   ├── utils/         # Utilitaires
-│   │   └── App.tsx        # Composant principal
-│   └── package.json
-│
-├── docker-compose.yml     # Configuration Docker
-└── README.md
+├── apps/                    # Applications principales
+│   ├── backend/            # API NestJS
+│   ├── frontend/           # Interface React
+│   └── database/           # Configuration PostgreSQL
+├── docs/                   # Documentation complète
+├── scripts/                # Scripts d'automatisation
+├── infrastructure/         # Docker & déploiement
+├── tools/                  # Outils de développement
+└── .github/               # CI/CD GitHub Actions
 ```
 
-## 🎨 Technologies Utilisées
+## 🚀 Démarrage rapide
 
-### Frontend
-- React 18
-- TypeScript
-- React Router DOM
-- Axios
-- React-Leaflet (cartes interactives)
-- CSS personnalisé
+### Prérequis
+- Node.js 18+
+- PostgreSQL 15+
+- Docker (optionnel)
 
-### Backend
-- NestJS
-- TypeORM
-- PostgreSQL
-- Swagger/OpenAPI
-- Nodemailer
-- class-validator
-
-## 🚀 Déploiement
-
-### Backend
+### Installation
 ```bash
-cd backend
-npm run build
-npm run start:prod
+# Cloner le projet
+git clone https://github.com/yakohhhh/autoaziz.git
+cd autoaziz
+
+# Installer les dépendances backend
+cd apps/backend
+npm install
+
+# Installer les dépendances frontend  
+cd ../frontend
+npm install --legacy-peer-deps
 ```
 
-### Frontend
+### Lancement en développement
 ```bash
-cd frontend
-npm run build
-# Les fichiers statiques seront dans le dossier build/
+# Backend (API)
+cd apps/backend
+npm run start:dev
+
+# Frontend (Interface)
+cd apps/frontend  
+npm start
 ```
 
-## 🔒 Sécurité
+## 📋 Applications
 
-- Validation des données avec class-validator
-- Protection CORS configurée
-- Variables d'environnement pour les données sensibles
-- Sanitisation des entrées utilisateur
+### 🔧 Backend (NestJS)
+- **Localisation** : `apps/backend/`
+- **API REST** avec Swagger/OpenAPI
+- **Base de données** PostgreSQL avec TypeORM
+- **Authentification** et vérification par code
+- **Emails** avec templates MJML
+- **SMS** via services externes
 
-## 📝 Licence
+### 🎨 Frontend (React)
+- **Localisation** : `apps/frontend/`  
+- **Interface moderne** avec TypeScript
+- **Carte interactive** Leaflet/OpenStreetMap
+- **Formulaires** de prise de rendez-vous
+- **Vérification** temps réel des codes
 
-Ce projet est sous licence MIT.
+## 🛠️ Scripts disponibles
 
-## 👥 Contributeurs
+### Développement
+```bash
+# Linting complet du projet
+./scripts/lint.sh
 
-- Développé pour Auto Aziz
+# Tests et validation
+./scripts/validate-push.sh
+
+# Monitoring des logs
+./scripts/monitor.sh
+```
+
+### Déploiement
+```bash
+# Installation complète
+./scripts/install.sh
+
+# Configuration serveur
+./scripts/server-setup.sh
+
+# Déploiement production
+./scripts/deploy-production.sh
+```
+
+## 🐳 Docker
+
+```bash
+# Développement
+docker-compose -f infrastructure/docker-compose.yml up
+
+# Production
+docker-compose -f infrastructure/docker-compose.prod.yml up -d
+```
+
+## 📚 Documentation
+
+Consultez le dossier `docs/` pour :
+- [Guide de déploiement](docs/DEPLOYMENT.md)
+- [Configuration ESLint](docs/ESLINT_SETUP.md) 
+- [Secrets GitHub](docs/GITHUB_SECRETS_GUIDE.md)
+- [Résolution des problèmes](docs/GITHUB_ACTIONS_FIX.md)
+- [Et plus encore...](docs/)
+
+## 🔧 Développement
+
+### Qualité du code
+- **ESLint** + **Prettier** pour le style
+- **Tests unitaires** Jest + Testing Library
+- **Pre-commit hooks** avec validation
+- **CI/CD** GitHub Actions
+
+### Architecture
+- **Clean Architecture** avec séparation des responsabilités
+- **Design Patterns** : Repository, DTO, Services
+- **TypeScript** strict sur tout le projet
+- **Configuration** centralisée par environnement
+
+## 🚀 CI/CD
+
+GitHub Actions automatisé :
+- ✅ Tests & Quality Checks
+- ✅ Builds & Validation
+- ✅ Security Audits
+- ✅ Docker Images
+- ✅ Déploiement automatique
 
 ## 📞 Support
 
-Pour toute question ou support, contactez-nous à : contact@autoaziz.fr
+Pour toute question ou problème :
+1. Consultez la [documentation](docs/)
+2. Vérifiez les [issues GitHub](https://github.com/yakohhhh/autoaziz/issues)
+3. Créez une nouvelle issue si nécessaire
+
+## 📝 Licence
+
+Ce projet est sous licence privée. Tous droits réservés.
+
+---
+
+**Développé avec ❤️ pour Auto Aziz** 🚗
