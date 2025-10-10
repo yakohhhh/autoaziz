@@ -1,0 +1,175 @@
+.pricing {
+  width: 100%;
+}
+
+.pricing-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.pricing-header h1 {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.pricing-header p {
+  font-size: 1.3em;
+}
+
+.pricing-content {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.pricing-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.pricing-card {
+  background: white;
+  border-radius: 10px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+
+.pricing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pricing-card.featured {
+  border: 3px solid #667eea;
+}
+
+.badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #667eea;
+  color: white;
+  padding: 5px 20px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.pricing-card h2 {
+  color: #333;
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.price {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.amount {
+  font-size: 3em;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 30px;
+}
+
+.features li {
+  padding: 12px 0;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+
+.features li:last-child {
+  border-bottom: none;
+}
+
+.cta-button {
+  display: block;
+  background: #667eea;
+  color: white;
+  text-align: center;
+  padding: 15px 30px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.cta-button:hover {
+  background: #5568d3;
+}
+
+.info-box {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.info-box h3 {
+  color: #667eea;
+  font-size: 1.5em;
+  margin-bottom: 15px;
+}
+
+.info-box p {
+  font-size: 1.2em;
+  color: #666;
+}
+
+.faq {
+  margin-top: 60px;
+}
+
+.faq h2 {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.faq-item {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.faq-item h3 {
+  color: #667eea;
+  font-size: 1.3em;
+  margin-bottom: 15px;
+}
+
+.faq-item p {
+  color: #666;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .pricing-header h1 {
+    font-size: 2em;
+  }
+  
+  .pricing-table {
+    grid-template-columns: 1fr;
+  }
+  
+  .amount {
+    font-size: 2.5em;
+  }
+}
