@@ -33,17 +33,17 @@ echo ""
 
 # Backend
 echo -e "${BLUE}🔧 Backend Status:${NC}"
-cd backend
+cd apps/backend
 BACKEND_RESULT=$(npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "✅ Aucun problème ESLint")
 echo "   $BACKEND_RESULT"
-cd ..
+cd ../..
 
 # Frontend  
 echo -e "${BLUE}⚛️ Frontend Status:${NC}"
-cd frontend
+cd apps/frontend
 FRONTEND_RESULT=$(npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "✅ Aucun problème ESLint")
 echo "   $FRONTEND_RESULT"
-cd ..
+cd ../..
 
 echo ""
 echo -e "${GREEN}✅ RÉSUMÉ DES AMÉLIORATIONS${NC}"

@@ -43,7 +43,7 @@ services:
   # Backend NestJS (développement)
   backend:
     build:
-      context: ./backend
+      context: ../apps/backend
       dockerfile: Dockerfile.dev
     container_name: autoaziz-backend-dev
     ports:
@@ -58,7 +58,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
-      - ./backend:/app
+      - ../apps/backend:/app
       - /app/node_modules
     depends_on:
       postgres:
@@ -72,7 +72,7 @@ services:
   # Frontend React (développement)
   frontend:
     build:
-      context: ./frontend
+      context: ../apps/frontend
       dockerfile: Dockerfile.dev
     container_name: autoaziz-frontend-dev
     ports:
@@ -81,7 +81,7 @@ services:
       - REACT_APP_API_URL=http://localhost:3001
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - ./frontend:/app
+      - ../apps/frontend:/app
       - /app/node_modules
     depends_on:
       - backend

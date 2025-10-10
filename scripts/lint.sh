@@ -94,12 +94,12 @@ show_stats() {
     print_header "📊 STATISTIQUES ESLINT"
     
     echo -e "${CYAN}Backend:${NC}"
-    cd backend && npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "Aucune statistique disponible"
-    cd ..
+    cd apps/backend && npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "Aucune statistique disponible"
+    cd ../..
     
     echo -e "${CYAN}Frontend:${NC}"
-    cd frontend && npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "Aucune statistique disponible"
-    cd ..
+    cd apps/frontend && npm run lint:check 2>&1 | grep -E "problems|errors|warnings" | tail -1 || echo "Aucune statistique disponible"
+    cd ../..
 }
 
 # ===============================================
@@ -109,14 +109,14 @@ format_code() {
     print_header "🧹 FORMATAGE PRETTIER"
     
     print_info "Formatage du backend..."
-    cd backend
+    cd apps/backend
     npm run format || print_error "Erreur formatage backend"
-    cd ..
+    cd ../..
     
     print_info "Formatage du frontend..."
-    cd frontend
+    cd apps/frontend
     npm run format || print_error "Erreur formatage frontend"
-    cd ..
+    cd ../..
     
     print_success "Formatage terminé"
 }
