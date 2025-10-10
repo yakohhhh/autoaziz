@@ -31,3 +31,4 @@ coverage/
 # Production
 /frontend/build
 /backend/dist
+backend/.env
