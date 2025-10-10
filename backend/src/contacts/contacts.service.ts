@@ -39,7 +39,7 @@ export class ContactsService {
     });
   }
 
-  async findOne(id: number): Promise<Contact> {
+  async findOne(id: number): Promise<Contact | null> {
     return this.contactRepository.findOne({ where: { id } });
   }
 }

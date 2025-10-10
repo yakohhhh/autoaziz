@@ -44,11 +44,11 @@ export class AppointmentsService {
     });
   }
 
-  async findOne(id: number): Promise<Appointment> {
+  async findOne(id: number): Promise<Appointment | null> {
     return this.appointmentRepository.findOne({ where: { id } });
   }
 
-  async updateStatus(id: number, status: string): Promise<Appointment> {
+  async updateStatus(id: number, status: string): Promise<Appointment | null> {
     await this.appointmentRepository.update(id, { status });
     return this.findOne(id);
   }

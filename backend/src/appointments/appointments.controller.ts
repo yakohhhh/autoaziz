@@ -26,7 +26,7 @@ export class AppointmentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get an appointment by id' })
   @ApiResponse({ status: 200, description: 'Appointment details', type: Appointment })
-  findOne(@Param('id') id: string): Promise<Appointment> {
+  findOne(@Param('id') id: string): Promise<Appointment | null> {
     return this.appointmentsService.findOne(+id);
   }
 
@@ -36,7 +36,7 @@ export class AppointmentsController {
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,
-  ): Promise<Appointment> {
+  ): Promise<Appointment | null> {
     return this.appointmentsService.updateStatus(+id, status);
   }
 }

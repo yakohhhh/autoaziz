@@ -26,7 +26,7 @@ export class ContactsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a contact message by id' })
   @ApiResponse({ status: 200, description: 'Contact details', type: Contact })
-  findOne(@Param('id') id: string): Promise<Contact> {
+  findOne(@Param('id') id: string): Promise<Contact | null> {
     return this.contactsService.findOne(+id);
   }
 }
