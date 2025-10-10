@@ -16,7 +16,9 @@ export class CreateContactDto {
   @IsString()
   phone: string;
 
-  @ApiProperty({ example: 'Je souhaite obtenir des informations sur vos services.' })
+  @ApiProperty({
+    example: 'Je souhaite obtenir des informations sur vos services.',
+  })
   @IsNotEmpty()
   @IsString()
   @MinLength(10)

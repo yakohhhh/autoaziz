@@ -1,0 +1,10 @@
+# 🚗 Auto Aziz - ESLint ignore
+node_modules/
+dist/
+build/
+*.js
+*.jsx
+coverage/
+.env*
+*.log
+*.d.ts

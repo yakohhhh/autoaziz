@@ -1,0 +1,26 @@
+# Frontend Dockerfile - Développement avec hot reload
+FROM node:18-alpine
+
+# Installer les outils nécessaires
+RUN apk add --no-cache libc6-compat
+
+# Créer le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de configuration
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Installer toutes les dépendances
+RUN npm ci && npm cache clean --force
+
+# Exposer le port
+EXPOSE 3000
+
+# Variables d'environnement pour React
+ENV REACT_APP_API_URL=http://localhost:3001
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+
+# Commande de développement
+CMD ["npm", "start"]

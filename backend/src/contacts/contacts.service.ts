@@ -10,7 +10,7 @@ export class ContactsService {
   constructor(
     @InjectRepository(Contact)
     private contactRepository: Repository<Contact>,
-    private emailService: EmailService,
+    private emailService: EmailService
   ) {}
 
   async create(createContactDto: CreateContactDto): Promise<Contact> {
@@ -20,14 +20,14 @@ export class ContactsService {
     // Send confirmation email to user
     await this.emailService.sendContactConfirmation(
       createContactDto.email,
-      createContactDto.name,
+      createContactDto.name
     );
 
     // Notify admin
     await this.emailService.notifyAdminNewContact(
       createContactDto.name,
       createContactDto.email,
-      createContactDto.message,
+      createContactDto.message
     );
 
     return savedContact;

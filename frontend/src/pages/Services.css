@@ -32,7 +32,9 @@
   border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .service-card:hover {
@@ -140,11 +142,11 @@
   .services-header h1 {
     font-size: 2em;
   }
-  
+
   .services-list {
     grid-template-columns: 1fr;
   }
-  
+
   .process-steps {
     grid-template-columns: 1fr;
   }

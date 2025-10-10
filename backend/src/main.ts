@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS for frontend
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:3001'],
@@ -13,10 +13,12 @@ async function bootstrap() {
   });
 
   // Enable validation
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    })
+  );
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -28,7 +30,12 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.PORT ?? 3001);
-  console.log(`Application is running on: http://localhost:${process.env.PORT ?? 3001}`);
-  console.log(`Swagger documentation: http://localhost:${process.env.PORT ?? 3001}/api`);
+  console.log(
+    `Application is running on: http://localhost:${process.env.PORT ?? 3001}`
+  );
+  console.log(
+    `Swagger documentation: http://localhost:${process.env.PORT ?? 3001}/api`
+  );
 }
-bootstrap();
+
+void bootstrap();

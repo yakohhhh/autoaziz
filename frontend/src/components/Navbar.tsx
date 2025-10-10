@@ -6,26 +6,26 @@ const Navbar: React.FC = () => {
   const location = useLocation();
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+    <nav className='navbar'>
+      <div className='navbar-container'>
+        <Link to='/' className='navbar-logo'>
           Auto Aziz
         </Link>
-        <ul className="navbar-menu">
+        <ul className='navbar-menu'>
           <li className={location.pathname === '/' ? 'active' : ''}>
-            <Link to="/">Accueil</Link>
+            <Link to='/'>Accueil</Link>
           </li>
           <li className={location.pathname === '/services' ? 'active' : ''}>
-            <Link to="/services">Services</Link>
+            <Link to='/services'>Services</Link>
           </li>
           <li className={location.pathname === '/tarifs' ? 'active' : ''}>
-            <Link to="/tarifs">Tarifs</Link>
+            <Link to='/tarifs'>Tarifs</Link>
           </li>
           <li className={location.pathname === '/rendez-vous' ? 'active' : ''}>
-            <Link to="/rendez-vous">Rendez-vous</Link>
+            <Link to='/rendez-vous'>Rendez-vous</Link>
           </li>
           <li className={location.pathname === '/contact' ? 'active' : ''}>
-            <Link to="/contact">Contact</Link>
+            <Link to='/contact'>Contact</Link>
           </li>
         </ul>
       </div>

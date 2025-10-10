@@ -11,14 +11,22 @@ export class ContactsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new contact message' })
-  @ApiResponse({ status: 201, description: 'Contact created successfully', type: Contact })
+  @ApiResponse({
+    status: 201,
+    description: 'Contact created successfully',
+    type: Contact,
+  })
   create(@Body() createContactDto: CreateContactDto): Promise<Contact> {
     return this.contactsService.create(createContactDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all contact messages' })
-  @ApiResponse({ status: 200, description: 'List of all contacts', type: [Contact] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all contacts',
+    type: [Contact],
+  })
   findAll(): Promise<Contact[]> {
     return this.contactsService.findAll();
   }

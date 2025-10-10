@@ -144,7 +144,9 @@
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition:
+    background 0.3s,
+    transform 0.2s;
 }
 
 .submit-button:hover {
@@ -160,11 +162,11 @@
   .contact-header h1 {
     font-size: 2em;
   }
-  
+
   .contact-info-section {
     grid-template-columns: 1fr;
   }
-  
+
   .contact-form {
     padding: 30px 20px;
   }

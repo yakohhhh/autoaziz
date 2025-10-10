@@ -12,14 +12,14 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className='App'>
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/tarifs" element={<Pricing />} />
-          <Route path="/rendez-vous" element={<Appointments />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/services' element={<Services />} />
+          <Route path='/tarifs' element={<Pricing />} />
+          <Route path='/rendez-vous' element={<Appointments />} />
+          <Route path='/contact' element={<Contact />} />
         </Routes>
         <Footer />
       </div>

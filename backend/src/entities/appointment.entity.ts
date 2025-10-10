@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('appointments')
@@ -36,8 +41,24 @@ export class Appointment {
   appointmentTime: string;
 
   @ApiProperty()
-  @Column({ default: 'pending' })
+  @Column({ default: 'pending_verification' })
   status: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  verificationCode: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  emailVerified: boolean;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  phoneVerified: boolean;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  verificationCodeExpiry: Date;
 
   @ApiProperty()
   @CreateDateColumn()

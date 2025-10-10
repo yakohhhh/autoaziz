@@ -106,7 +106,9 @@
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition:
+    background 0.3s,
+    transform 0.2s;
 }
 
 .submit-button:hover {
@@ -122,7 +124,7 @@
   .appointments-header h1 {
     font-size: 2em;
   }
-  
+
   .appointment-form {
     padding: 30px 20px;
   }

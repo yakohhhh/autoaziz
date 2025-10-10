@@ -1,0 +1,12 @@
+# 🚗 Auto Aziz - ESLint ignore
+node_modules/
+build/
+public/
+coverage/
+*.js
+*.jsx
+*.d.ts
+.env*
+*.log
+src/reportWebVitals.ts
+src/setupTests.ts

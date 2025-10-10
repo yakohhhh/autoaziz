@@ -1,0 +1,31 @@
+[Unit]
+Description=Auto Aziz GitHub Webhook Server
+After=network.target
+
+[Service]
+Type=simple
+User=autoaziz
+WorkingDirectory=/opt/autoaziz
+ExecStart=/usr/bin/node webhook-server.js
+Restart=always
+RestartSec=10
+
+# Variables d'environnement
+Environment=NODE_ENV=production
+Environment=WEBHOOK_PORT=9000
+Environment=GITHUB_WEBHOOK_SECRET=your-webhook-secret-here
+Environment=DEPLOY_SCRIPT=/opt/autoaziz/deploy.sh
+Environment=LOG_FILE=/var/log/autoaziz-webhook.log
+
+# Sécurité
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/log /opt/autoaziz
+
+# Limites de ressources
+LimitNOFILE=65536
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target
