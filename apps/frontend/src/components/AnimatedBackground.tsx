@@ -25,7 +25,6 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
       });
     };
 
-    // Générer des particules pour le variant particles
     if (variant === 'particles') {
       const newParticles = Array.from({ length: 20 }, (_, i) => ({
         id: i,
@@ -42,10 +41,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
 
   return (
     <div className={`animated-background animated-background--${variant}`}>
-      {/* Fond dégradé de base */}
+      {}
       <div className='background-gradient'></div>
-
-      {/* Orbes flottants */}
+      {}
       {variant !== 'minimal' && (
         <>
           <div className='gradient-orb orb-1'></div>
@@ -54,16 +52,12 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
           <div className='gradient-orb orb-4'></div>
         </>
       )}
-
-      {/* Suiveur de souris */}
       <div
         className='mouse-follower'
         style={{
           transform: `translate(${mousePosition.x}vw, ${mousePosition.y}vh)`,
         }}
       />
-
-      {/* Particules flottantes pour le variant particles */}
       {variant === 'particles' && (
         <div className='particles-container'>
           {particles.map(particle => (
@@ -81,8 +75,6 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
           ))}
         </div>
       )}
-
-      {/* Grille animée en arrière-plan */}
       {variant === 'default' && (
         <div className='animated-grid'>
           <div
@@ -111,8 +103,6 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
           ></div>
         </div>
       )}
-
-      {/* Contenu */}
       {children && <div className='background-content'>{children}</div>}
     </div>
   );

@@ -7,48 +7,58 @@ import './Appointments.css';
 const Appointments: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    vehicleRegistration: '',
-    vehicleType: 'Voiture',
-    vehicleBrand: '',
-    vehicleModel: '',
-    vehicleYear: new Date().getFullYear(),
-    fuelType: 'Essence',
-    appointmentDate: '',
-    appointmentTime: '',
-    notes: '',
-  });
+  const loadFormData = () => {
+    try {
+      const savedData = localStorage.getItem('appointmentFormData');
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {}
+    return {
+      name: '',
+      email: '',
+      phone: '',
+      vehicleRegistration: '',
+      vehicleType: 'Voiture',
+      vehicleBrand: '',
+      vehicleModel: '',
+      vehicleYear: new Date().getFullYear(),
+      fuelType: 'Essence',
+      appointmentDate: '',
+      appointmentTime: '',
+      notes: '',
+    };
+  };
 
+  const [formData, setFormData] = useState(loadFormData());
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
 
   useEffect(() => {
+    localStorage.setItem('appointmentFormData', JSON.stringify(formData));
+  }, [formData]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
-  // Mettre à jour les modèles disponibles quand la marque change
   useEffect(() => {
     if (formData.vehicleBrand) {
       const brand = VEHICLE_BRANDS[formData.vehicleType]?.find(
         b => b.name === formData.vehicleBrand
       );
       setAvailableModels(brand?.models || []);
-      // Reset le modèle si la marque change
-      setFormData(prev => ({ ...prev, vehicleModel: '' }));
+      setFormData((prev: typeof formData) => ({ ...prev, vehicleModel: '' }));
     } else {
       setAvailableModels([]);
     }
   }, [formData.vehicleBrand, formData.vehicleType]);
 
-  // Réinitialiser marque et modèle quand le type change
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev: typeof formData) => ({
       ...prev,
       vehicleBrand: '',
       vehicleModel: '',
@@ -77,6 +87,9 @@ const Appointments: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || submitted) {
+      return;
+    }
     setError('');
     setLoading(true);
 
@@ -175,7 +188,7 @@ const Appointments: React.FC = () => {
                 onClick={() => {
                   setSubmitted(false);
                   setCurrentStep(1);
-                  setFormData({
+                  const resetData = {
                     name: '',
                     email: '',
                     phone: '',
@@ -188,7 +201,9 @@ const Appointments: React.FC = () => {
                     appointmentDate: '',
                     appointmentTime: '',
                     notes: '',
-                  });
+                  };
+                  setFormData(resetData);
+                  localStorage.removeItem('appointmentFormData');
                 }}
                 className='btn-new-appointment'
               >
@@ -508,6 +523,16 @@ const Appointments: React.FC = () => {
                             })}{' '}
                             à {formData.appointmentTime}
                           </p>
+                          <small
+                            style={{
+                              color: '#667eea',
+                              fontWeight: '600',
+                              marginTop: '8px',
+                              display: 'block',
+                            }}
+                          >
+                            👉 Cliquez sur "Continuer" pour valider ce créneau
+                          </small>
                         </div>
                       </div>
                     )}

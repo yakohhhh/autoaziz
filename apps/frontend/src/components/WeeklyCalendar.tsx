@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/fr';
 import './WeeklyCalendar.css';
+
+// Configuration de dayjs
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale('fr');
 
 interface TimeSlot {
   time: string;
@@ -33,8 +42,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   const [loading, setLoading] = useState(false);
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
 
+  const TIMEZONE = 'Europe/Paris';
+
   const loadWeekData = React.useCallback(async () => {
     setLoading(true);
+    const scrollPosition = window.scrollY;
     try {
       const response = await axios.get(
         `http://localhost:3001/appointments/available-slots?weekOffset=${weekOffset}`
@@ -44,8 +56,10 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         start: response.data.weekStart,
         end: response.data.weekEnd,
       });
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition);
+      }, 0);
     } catch (error) {
-      console.error('Erreur lors du chargement des créneaux:', error);
     } finally {
       setLoading(false);
     }
@@ -56,17 +70,14 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   }, [weekOffset, loadWeekData]);
 
   const handleSlotClick = (day: DaySlots, slot: TimeSlot) => {
-    if (day.isPast || day.isWithin24Hours || !slot.available) {
+    if (day.isPast || !slot.available) {
       return;
     }
     onSelectSlot(day.date, slot.time);
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleDateString('fr-FR', { month: 'short' });
-    return `${day} ${month}`;
+    return dayjs(dateString).tz(TIMEZONE).format('D MMM');
   };
 
   const nextWeek = () => {
@@ -87,6 +98,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     <div className='weekly-calendar'>
       <div className='calendar-header'>
         <button
+          type='button'
           onClick={prevWeek}
           disabled={weekOffset === 0 || loading}
           className='nav-button'
@@ -98,13 +110,22 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
             {formatDate(weekRange.start)} - {formatDate(weekRange.end)}
           </h3>
           {weekOffset > 0 && (
-            <button onClick={goToCurrentWeek} className='current-week-btn'>
+            <button
+              type='button'
+              onClick={goToCurrentWeek}
+              className='current-week-btn'
+            >
               Aujourd'hui
             </button>
           )}
         </div>
 
-        <button onClick={nextWeek} disabled={loading} className='nav-button'>
+        <button
+          type='button'
+          onClick={nextWeek}
+          disabled={loading}
+          className='nav-button'
+        >
           Semaine suivante <span>→</span>
         </button>
       </div>
@@ -139,30 +160,17 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                   </div>
                 )}
 
-                {!day.isPast && day.isWithin24Hours && (
-                  <div className='day-message warning'>
-                    <span className='icon'>⚠️</span>
-                    <p>Réservation impossible</p>
-                    <small>Minimum 24h à l'avance</small>
-                    <small className='contact-info'>
-                      📞 Appelez-nous pour une urgence
-                    </small>
+                {!day.isPast && day.slots.length === 0 && (
+                  <div className='day-message'>
+                    <span className='icon'>🔒</span>
+                    <p>Fermé</p>
                   </div>
                 )}
 
                 {!day.isPast &&
-                  !day.isWithin24Hours &&
-                  day.slots.length === 0 && (
-                    <div className='day-message'>
-                      <span className='icon'>🔒</span>
-                      <p>Fermé</p>
-                    </div>
-                  )}
-
-                {!day.isPast &&
-                  !day.isWithin24Hours &&
                   day.slots.map(slot => (
                     <button
+                      type='button'
                       key={slot.time}
                       onClick={() => handleSlotClick(day, slot)}
                       disabled={!slot.available}
@@ -171,8 +179,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                           ? 'selected'
                           : ''
                       } ${!slot.available ? 'unavailable' : ''} ${
-                        slot.reserved ? 'reserved' : ''
+                        slot.reserved && slot.available ? 'reserved' : ''
                       }`}
+                      title={!slot.available ? 'Complet' : ''}
                     >
                       <span className='time'>{slot.time}</span>
                       {!slot.available && (
