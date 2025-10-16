@@ -1,14 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Query,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AppointmentsService } from './appointments.service';
+import { SlotsService } from './slots.service';
 import { CreateAppointmentDto } from '../dto/create-appointment.dto';
 import { VerifyAppointmentDto } from '../dto/verify-appointment.dto';
 import { Appointment } from '../entities/appointment.entity';
+import { AvailableSlotsResponseDto } from '../dto/available-slots.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(
+    private readonly appointmentsService: AppointmentsService,
+    private readonly slotsService: SlotsService
+  ) {}
+
+  @Get('available-slots')
+  @ApiOperation({
+    summary: 'Récupérer les créneaux disponibles pour une semaine',
+  })
+  @ApiQuery({
+    name: 'weekOffset',
+    required: false,
+    type: Number,
+    description:
+      'Décalage en semaines (0 = semaine actuelle, 1 = semaine suivante, etc.)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Créneaux disponibles',
+    type: AvailableSlotsResponseDto,
+  })
+  async getAvailableSlots(
+    @Query('weekOffset') weekOffset?: string
+  ): Promise<AvailableSlotsResponseDto> {
+    const offset = weekOffset ? parseInt(weekOffset, 10) : 0;
+    return this.slotsService.getAvailableSlots(offset);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Créer un nouveau rendez-vous' })
@@ -17,7 +53,7 @@ export class AppointmentsController {
     description: 'Rendez-vous créé avec succès',
     type: Appointment,
   })
-  create(
+  async create(
     @Body() createAppointmentDto: CreateAppointmentDto
   ): Promise<Appointment> {
     return this.appointmentsService.create(createAppointmentDto);

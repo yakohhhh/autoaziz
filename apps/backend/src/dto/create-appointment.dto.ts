@@ -1,4 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, IsDateString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsDateString,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAppointmentDto {
@@ -21,10 +30,39 @@ export class CreateAppointmentDto {
   @IsString()
   vehicleRegistration: string;
 
-  @ApiProperty({ example: 'Voiture' })
+  @ApiProperty({
+    example: 'Voiture',
+    description: 'Type de véhicule: Voiture, Moto, Camionnette, Collection',
+  })
   @IsNotEmpty()
   @IsString()
   vehicleType: string;
+
+  @ApiProperty({ example: 'Renault', description: 'Marque du véhicule' })
+  @IsNotEmpty()
+  @IsString()
+  vehicleBrand: string;
+
+  @ApiProperty({ example: 'Clio', description: 'Modèle du véhicule' })
+  @IsNotEmpty()
+  @IsString()
+  vehicleModel: string;
+
+  @ApiProperty({ example: 2020, description: 'Année de mise en circulation' })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(1950)
+  @Max(new Date().getFullYear() + 1)
+  vehicleYear: number;
+
+  @ApiProperty({
+    example: 'Essence',
+    description: 'Type de carburant',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fuelType?: string;
 
   @ApiProperty({ example: '2024-01-15' })
   @IsDateString()
@@ -34,4 +72,9 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   @IsString()
   appointmentTime: string;
+
+  @ApiProperty({ example: 'Première visite', required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

@@ -55,11 +55,11 @@ const Services: React.FC = () => {
           <div className='gradient-orb orb-2'></div>
         </div>
         <div className={`header-content ${isVisible ? 'fade-in' : ''}`}>
-          <div className='service-badge'>
-            🏅 Certifié DEKRA depuis 1995
-          </div>
+          <div className='service-badge'>🏅 Certifié DEKRA depuis 1995</div>
           <h1>Nos Services Premium</h1>
-          <p>Des prestations de qualité supérieure pour tous types de véhicules</p>
+          <p>
+            Des prestations de qualité supérieure pour tous types de véhicules
+          </p>
         </div>
       </section>
 
@@ -71,8 +71,13 @@ const Services: React.FC = () => {
           </div>
           <div className='services-grid'>
             {services.map((service, index) => (
-              <div key={index} className={`service-card ${service.popular ? 'popular' : ''}`}>
-                {service.popular && <div className='popular-badge'>Populaire</div>}
+              <div
+                key={index}
+                className={`service-card ${service.popular ? 'popular' : ''}`}
+              >
+                {service.popular && (
+                  <div className='popular-badge'>Populaire</div>
+                )}
                 <div className='service-icon'>{service.icon}</div>
                 <h3>{service.title}</h3>
                 <p className='description'>{service.description}</p>
@@ -108,7 +113,10 @@ const Services: React.FC = () => {
               </div>
               <div className='step-content'>
                 <h3>Accueil & Vérification</h3>
-                <p>Présentation de vos documents et vérification de votre identité dans notre espace d'accueil moderne</p>
+                <p>
+                  Présentation de vos documents et vérification de votre
+                  identité dans notre espace d'accueil moderne
+                </p>
               </div>
             </div>
             <div className='step-connector'></div>
@@ -118,7 +126,10 @@ const Services: React.FC = () => {
               </div>
               <div className='step-content'>
                 <h3>Contrôle Technique</h3>
-                <p>Inspection complète de votre véhicule par nos techniciens certifiés avec équipements de dernière génération</p>
+                <p>
+                  Inspection complète de votre véhicule par nos techniciens
+                  certifiés avec équipements de dernière génération
+                </p>
               </div>
             </div>
             <div className='step-connector'></div>
@@ -128,7 +139,10 @@ const Services: React.FC = () => {
               </div>
               <div className='step-content'>
                 <h3>Résultat & Conseils</h3>
-                <p>Remise du procès-verbal, explications détaillées et conseils personnalisés pour votre véhicule</p>
+                <p>
+                  Remise du procès-verbal, explications détaillées et conseils
+                  personnalisés pour votre véhicule
+                </p>
               </div>
             </div>
           </div>
@@ -139,7 +153,9 @@ const Services: React.FC = () => {
         <div className='container'>
           <div className='cta-content'>
             <h2>Prêt à réserver votre contrôle ?</h2>
-            <p>Prenez rendez-vous dès maintenant et bénéficiez de notre expertise</p>
+            <p>
+              Prenez rendez-vous dès maintenant et bénéficiez de notre expertise
+            </p>
             <Link to='/rendez-vous' className='btn-primary-large'>
               Réserver en ligne
             </Link>

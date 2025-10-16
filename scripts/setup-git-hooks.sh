@@ -45,28 +45,28 @@ echo "🔍 Vérification ESLint..."
 
 # Vérification TypeScript
 echo "🔍 Vérification TypeScript..."
-cd backend
+cd apps/backend
 npm run build || {
     echo "❌ Erreurs de compilation TypeScript détectées."
     exit 1
 }
-cd ..
+cd ../..
 
-cd frontend
+cd apps/frontend
 npm run build || {
     echo "❌ Erreurs de compilation TypeScript détectées dans le frontend."
     exit 1
 }
-cd ..
+cd ../..
 
 # Tests
 echo "🧪 Exécution des tests..."
-cd backend
+cd apps/backend
 npm run test || {
     echo "❌ Tests échoués."
     exit 1
 }
-cd ..
+cd ../..
 
 echo "✅ Toutes les vérifications sont passées!"
 EOF
@@ -116,28 +116,28 @@ echo "🚀 Vérifications avant push..."
 
 # Tests d'intégration
 echo "🧪 Exécution des tests d'intégration..."
-cd backend
+cd apps/backend
 npm run test:e2e || {
     echo "❌ Tests d'intégration échoués."
     exit 1
 }
-cd ..
+cd ../..
 
 # Vérification de sécurité
 echo "🔒 Audit de sécurité..."
-cd backend
+cd apps/backend
 npm audit --audit-level moderate || {
     echo "⚠️  Vulnérabilités de sécurité détectées. Exécutez 'npm audit fix'."
     exit 1
 }
 cd ..
 
-cd frontend
+cd ../frontend
 npm audit --audit-level moderate || {
     echo "⚠️  Vulnérabilités de sécurité détectées dans le frontend."
     exit 1
 }
-cd ..
+cd ../..
 
 echo "✅ Prêt pour le push!"
 EOF

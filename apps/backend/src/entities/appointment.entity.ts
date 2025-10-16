@@ -25,19 +25,35 @@ export class Appointment {
   phone: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ name: 'vehicleRegistration' })
   vehicleRegistration: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ name: 'vehicleType' })
   vehicleType: string;
 
   @ApiProperty()
-  @Column('date')
+  @Column({ name: 'vehicleBrand' })
+  vehicleBrand: string;
+
+  @ApiProperty()
+  @Column({ name: 'vehicleModel' })
+  vehicleModel: string;
+
+  @ApiProperty()
+  @Column({ name: 'vehicleYear' })
+  vehicleYear: number;
+
+  @ApiProperty()
+  @Column({ name: 'fuelType', nullable: true })
+  fuelType: string;
+
+  @ApiProperty()
+  @Column({ type: 'date', name: 'appointmentDate' })
   appointmentDate: Date;
 
   @ApiProperty()
-  @Column()
+  @Column({ name: 'appointmentTime' })
   appointmentTime: string;
 
   @ApiProperty()
@@ -45,22 +61,26 @@ export class Appointment {
   status: string;
 
   @ApiProperty()
-  @Column({ nullable: true })
+  @Column({ name: 'verificationCode', nullable: true })
   verificationCode: string;
 
   @ApiProperty()
-  @Column({ nullable: true })
+  @Column({ name: 'emailVerified', nullable: true })
   emailVerified: boolean;
 
   @ApiProperty()
-  @Column({ nullable: true })
+  @Column({ name: 'phoneVerified', nullable: true })
   phoneVerified: boolean;
 
   @ApiProperty()
-  @Column({ nullable: true })
+  @Column({ name: 'verificationCodeExpiry', nullable: true })
   verificationCodeExpiry: Date;
 
   @ApiProperty()
-  @CreateDateColumn()
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
+  @ApiProperty()
+  @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 }

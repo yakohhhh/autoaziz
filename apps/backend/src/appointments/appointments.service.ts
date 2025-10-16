@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Appointment } from '../entities/appointment.entity';
 import { CreateAppointmentDto } from '../dto/create-appointment.dto';
 import { EmailService } from '../email/email.service';
 import { VerificationService } from '../verification/verification.service';
+import { SlotsService } from './slots.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -12,12 +13,23 @@ export class AppointmentsService {
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
     private emailService: EmailService,
-    private verificationService: VerificationService
+    private verificationService: VerificationService,
+    private slotsService: SlotsService
   ) {}
 
   async create(
     createAppointmentDto: CreateAppointmentDto
   ): Promise<Appointment> {
+    // Valider le créneau avant de créer le rendez-vous
+    const slotValidation = await this.slotsService.validateSlot(
+      createAppointmentDto.appointmentDate,
+      createAppointmentDto.appointmentTime
+    );
+
+    if (!slotValidation.valid) {
+      throw new BadRequestException(slotValidation.message);
+    }
+
     // Crée le rendez-vous avec le statut "pending_verification"
     const appointmentData = {
       ...createAppointmentDto,

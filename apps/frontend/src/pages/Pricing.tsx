@@ -23,8 +23,8 @@ const Pricing: React.FC = () => {
         '124 points de contrôle réglementaires',
         'Procès-verbal immédiat',
         'Conseils personnalisés gratuits',
-        'Garantie qualité 100%'
-      ]
+        'Garantie qualité 100%',
+      ],
     },
     {
       id: 'counter-visit',
@@ -37,8 +37,8 @@ const Pricing: React.FC = () => {
         'Vérification des réparations effectuées',
         'Valable dans les 2 mois suivants',
         'Nouveau procès-verbal si conforme',
-        'Conseils pour la mise en conformité'
-      ]
+        'Conseils pour la mise en conformité',
+      ],
     },
     {
       id: 'pollution',
@@ -51,8 +51,8 @@ const Pricing: React.FC = () => {
         'Test des émissions polluantes',
         'Mesure CO, HC, NOx et opacité',
         'Rapport détaillé avec recommandations',
-        'Conseils environnementaux'
-      ]
+        'Conseils environnementaux',
+      ],
     },
     {
       id: 'collection',
@@ -65,9 +65,9 @@ const Pricing: React.FC = () => {
         'Contrôle spécialisé +30ans',
         'Expertise adaptée aux anciens',
         'Certificat de conformité',
-        'Accompagnement personnalisé'
-      ]
-    }
+        'Accompagnement personnalisé',
+      ],
+    },
   ];
 
   return (
@@ -82,7 +82,10 @@ const Pricing: React.FC = () => {
             💎 Prix transparents, qualité garantie
           </div>
           <h1>Tarifs & Services</h1>
-          <p>Des prix justes et transparents pour tous vos besoins de contrôle technique</p>
+          <p>
+            Des prix justes et transparents pour tous vos besoins de contrôle
+            technique
+          </p>
         </div>
       </section>
 
@@ -92,11 +95,16 @@ const Pricing: React.FC = () => {
             <h2>Choisissez votre formule</h2>
             <p>Tous nos tarifs sont TTC, sans frais cachés</p>
           </div>
-          
+
           <div className='pricing-grid'>
-            {pricingPlans.map((plan) => (
-              <div key={plan.id} className={`pricing-card ${plan.popular ? 'popular' : ''}`}>
-                {plan.popular && <div className='popular-badge'>⭐ Le plus demandé</div>}
+            {pricingPlans.map(plan => (
+              <div
+                key={plan.id}
+                className={`pricing-card ${plan.popular ? 'popular' : ''}`}
+              >
+                {plan.popular && (
+                  <div className='popular-badge'>⭐ Le plus demandé</div>
+                )}
                 <div className='card-header'>
                   <div className='service-icon'>{plan.icon}</div>
                   <h3>{plan.name}</h3>
@@ -106,7 +114,7 @@ const Pricing: React.FC = () => {
                   </div>
                   <div className='duration-badge'>⏱ {plan.duration}</div>
                 </div>
-                
+
                 <div className='card-body'>
                   <ul className='features-list'>
                     {plan.features.map((feature, index) => (
@@ -117,7 +125,7 @@ const Pricing: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className='card-footer'>
                   <Link to='/rendez-vous' className='book-btn'>
                     <span>📅</span>
@@ -163,41 +171,42 @@ const Pricing: React.FC = () => {
             <h2>Questions Fréquentes</h2>
             <p>Tout ce que vous devez savoir sur le contrôle technique</p>
           </div>
-          
+
           <div className='faq-grid'>
             <div className='faq-item'>
               <div className='faq-icon'>📅</div>
               <h3>Quand faire mon contrôle technique ?</h3>
               <p>
-                Premier contrôle dans les 6 mois avant le 4ème anniversaire de votre véhicule, 
-                puis tous les 2 ans. Nous vous envoyons des rappels automatiques !
+                Premier contrôle dans les 6 mois avant le 4ème anniversaire de
+                votre véhicule, puis tous les 2 ans. Nous vous envoyons des
+                rappels automatiques !
               </p>
             </div>
-            
+
             <div className='faq-item'>
               <div className='faq-icon'>📋</div>
               <h3>Quels documents apporter ?</h3>
               <p>
-                Carte grise du véhicule et pièce d'identité du propriétaire. 
+                Carte grise du véhicule et pièce d'identité du propriétaire.
                 C'est tout ! Nous nous occupons du reste.
               </p>
             </div>
-            
+
             <div className='faq-item'>
               <div className='faq-icon'>🔧</div>
               <h3>Contrôle défavorable ?</h3>
               <p>
-                Pas de panique ! Vous avez 2 mois pour effectuer les réparations 
+                Pas de panique ! Vous avez 2 mois pour effectuer les réparations
                 et revenir pour la contre-visite à prix réduit.
               </p>
             </div>
-            
+
             <div className='faq-item'>
               <div className='faq-icon'>⏰</div>
               <h3>Combien de temps ça prend ?</h3>
               <p>
-                Entre 15 et 45 minutes selon le type de contrôle. 
-                Vous pouvez attendre confortablement dans notre espace d'accueil.
+                Entre 15 et 45 minutes selon le type de contrôle. Vous pouvez
+                attendre confortablement dans notre espace d'accueil.
               </p>
             </div>
           </div>

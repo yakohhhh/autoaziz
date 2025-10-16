@@ -5,6 +5,7 @@ import { AppointmentsService } from './appointments.service';
 import { Appointment } from '../entities/appointment.entity';
 import { EmailService } from '../email/email.service';
 import { VerificationService } from '../verification/verification.service';
+import { SlotsService } from './slots.service';
 
 describe('AppointmentsService', () => {
   let service: AppointmentsService;
@@ -28,6 +29,14 @@ describe('AppointmentsService', () => {
           useValue: {
             generateVerificationCode: jest.fn(),
             verifyCode: jest.fn(),
+          },
+        },
+        {
+          provide: SlotsService,
+          useValue: {
+            getAvailableSlots: jest.fn(),
+            isSlotAvailable: jest.fn(),
+            reserveSlot: jest.fn(),
           },
         },
       ],

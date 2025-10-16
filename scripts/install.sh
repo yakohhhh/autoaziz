@@ -84,7 +84,7 @@ fi
 
 # Installation des dépendances backend
 log_info "Installation des dépendances backend..."
-cd backend
+cd apps/backend
 npm install --production=false
 log_success "Dépendances backend installées"
 
@@ -134,7 +134,7 @@ if [ -d ".git" ]; then
 echo "🔍 Vérification pre-commit..."
 
 # Vérifier le linting backend
-cd backend
+cd apps/backend
 npm run lint
 if [ $? -ne 0 ]; then
     echo "❌ Erreurs de linting backend détectées"
@@ -165,9 +165,9 @@ fi
 
 # Build initial
 log_info "Build initial du projet..."
-cd backend && npm run build
+cd apps/backend && npm run build
 cd ../frontend && npm run build
-cd ..
+cd ../..
 log_success "Build initial terminé"
 
 # Configuration des scripts npm globaux
@@ -178,22 +178,22 @@ cat > package.json << 'EOF'
   "version": "1.0.0",
   "description": "Auto Aziz - Système de gestion de rendez-vous avec vérification",
   "scripts": {
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "npm install && cd apps/backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run start:dev",
-    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd apps/backend && npm run start:dev",
+    "dev:frontend": "cd apps/frontend && npm start",
     "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd apps/backend && npm run build",
+    "build:frontend": "cd apps/frontend && npm run build",
     "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm run test",
-    "test:frontend": "cd frontend && npm test -- --watchAll=false",
+    "test:backend": "cd apps/backend && npm run test",
+    "test:frontend": "cd apps/frontend && npm test -- --watchAll=false",
     "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint || true",
+    "lint:backend": "cd apps/backend && npm run lint",
+    "lint:frontend": "cd apps/frontend && npm run lint || true",
     "docker:dev": "docker-compose up --build",
     "docker:prod": "docker-compose -f docker-compose.prod.yml up --build",
-    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules backend/dist frontend/build",
+    "clean": "rm -rf node_modules apps/backend/node_modules apps/frontend/node_modules apps/backend/dist apps/frontend/build",
     "reset": "npm run clean && npm run install:all"
   },
   "devDependencies": {

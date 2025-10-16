@@ -20,17 +20,15 @@ const Home: React.FC = () => {
           <div className='gradient-orb orb-3'></div>
         </div>
         <div className={`hero-content ${isVisible ? 'fade-in' : ''}`}>
-          <div className='hero-badge'>
-            ✨ Centre certifié depuis 1995
-          </div>
+          <div className='hero-badge'>✨ Centre certifié depuis 1995</div>
           <h1 className='hero-title'>
             <span className='highlight'>Auto Aziz</span>
             <br />
             Contrôle Technique Excellence
           </h1>
           <p className='hero-subtitle'>
-            Votre sécurité routière est notre engagement quotidien. 
-            Expertise, rapidité et transparence garanties.
+            Votre sécurité routière est notre engagement quotidien. Expertise,
+            rapidité et transparence garanties.
           </p>
           <div className='hero-actions'>
             <Link to='/rendez-vous' className='cta-primary'>
@@ -69,12 +67,18 @@ const Home: React.FC = () => {
             <div className='feature-card'>
               <div className='feature-icon'>🔧</div>
               <h3>Équipement de pointe</h3>
-              <p>Matériel dernier cri et techniciens certifiés pour un diagnostic précis et fiable</p>
+              <p>
+                Matériel dernier cri et techniciens certifiés pour un diagnostic
+                précis et fiable
+              </p>
             </div>
             <div className='feature-card'>
               <div className='feature-icon'>⚡</div>
               <h3>Service express</h3>
-              <p>Contrôle rapide sans compromis sur la qualité, résultats immédiats</p>
+              <p>
+                Contrôle rapide sans compromis sur la qualité, résultats
+                immédiats
+              </p>
             </div>
             <div className='feature-card'>
               <div className='feature-icon'>💎</div>
@@ -84,17 +88,25 @@ const Home: React.FC = () => {
             <div className='feature-card'>
               <div className='feature-icon'>📱</div>
               <h3>Réservation facile</h3>
-              <p>Prenez rendez-vous en ligne, recevez des rappels automatiques</p>
+              <p>
+                Prenez rendez-vous en ligne, recevez des rappels automatiques
+              </p>
             </div>
             <div className='feature-card'>
               <div className='feature-icon'>🚗</div>
               <h3>Tous véhicules</h3>
-              <p>Voitures, motos, utilitaires - nous contrôlons tous types de véhicules</p>
+              <p>
+                Voitures, motos, utilitaires - nous contrôlons tous types de
+                véhicules
+              </p>
             </div>
             <div className='feature-card'>
               <div className='feature-icon'>🛡️</div>
               <h3>Garantie qualité</h3>
-              <p>Service certifié avec garantie, votre sécurité est notre priorité</p>
+              <p>
+                Service certifié avec garantie, votre sécurité est notre
+                priorité
+              </p>
             </div>
           </div>
         </div>
@@ -105,7 +117,9 @@ const Home: React.FC = () => {
         <div className='container'>
           <div className='cta-content'>
             <h2>Prêt pour votre contrôle technique ?</h2>
-            <p>Réservez dès maintenant et bénéficiez de notre service premium</p>
+            <p>
+              Réservez dès maintenant et bénéficiez de notre service premium
+            </p>
             <div className='cta-actions'>
               <Link to='/rendez-vous' className='btn-primary-large'>
                 Prendre rendez-vous
@@ -125,7 +139,11 @@ const Home: React.FC = () => {
             <div className='contact-card'>
               <div className='contact-icon'>📍</div>
               <h3>Adresse</h3>
-              <p>123 Rue de la République<br />75001 Paris, France</p>
+              <p>
+                123 Rue de la République
+                <br />
+                75001 Paris, France
+              </p>
             </div>
             <div className='contact-card'>
               <div className='contact-icon'>📞</div>
@@ -135,7 +153,11 @@ const Home: React.FC = () => {
             <div className='contact-card'>
               <div className='contact-icon'>⏰</div>
               <h3>Horaires</h3>
-              <p>Lun-Ven: 8h-18h<br />Sam: 9h-17h</p>
+              <p>
+                Lun-Ven: 8h-18h
+                <br />
+                Sam: 9h-17h
+              </p>
             </div>
             <div className='contact-card'>
               <div className='contact-icon'>✉️</div>

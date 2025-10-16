@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
+import { SlotsService } from './slots.service';
 
 describe('AppointmentsController', () => {
   let controller: AppointmentsController;
@@ -19,6 +20,14 @@ describe('AppointmentsController', () => {
             remove: jest.fn(),
             verify: jest.fn(),
             resendVerification: jest.fn(),
+          },
+        },
+        {
+          provide: SlotsService,
+          useValue: {
+            getAvailableSlots: jest.fn(),
+            isSlotAvailable: jest.fn(),
+            reserveSlot: jest.fn(),
           },
         },
       ],
