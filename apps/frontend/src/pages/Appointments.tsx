@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import WeeklyCalendar from '../components/WeeklyCalendar';
-import { VEHICLE_BRANDS, FUEL_TYPES, getYearsList } from '../utils/vehicleData';
+import { VEHICLE_BRANDS, FUEL_TYPES } from '../utils/vehicleData';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {
@@ -15,14 +15,15 @@ const Appointments: React.FC = () => {
       }
     } catch (error) {}
     return {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
-      phone: '',
+      phone: '+33',
       vehicleRegistration: '',
       vehicleType: 'Voiture',
       vehicleBrand: '',
+      vehicleBrandCustom: '',
       vehicleModel: '',
-      vehicleYear: new Date().getFullYear(),
       fuelType: 'Essence',
       appointmentDate: '',
       appointmentTime: '',
@@ -34,7 +35,6 @@ const Appointments: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
 
   useEffect(() => {
     localStorage.setItem('appointmentFormData', JSON.stringify(formData));
@@ -44,18 +44,6 @@ const Appointments: React.FC = () => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (formData.vehicleBrand) {
-      const brand = VEHICLE_BRANDS[formData.vehicleType]?.find(
-        b => b.name === formData.vehicleBrand
-      );
-      setAvailableModels(brand?.models || []);
-      setFormData((prev: typeof formData) => ({ ...prev, vehicleModel: '' }));
-    } else {
-      setAvailableModels([]);
-    }
-  }, [formData.vehicleBrand, formData.vehicleType]);
 
   useEffect(() => {
     setFormData((prev: typeof formData) => ({
@@ -73,7 +61,7 @@ const Appointments: React.FC = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'vehicleYear' ? parseInt(value) : value,
+      [name]: value,
     });
   };
 
@@ -94,7 +82,18 @@ const Appointments: React.FC = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:3001/appointments', formData);
+      // Si "Autre" est sélectionné, utiliser la marque personnalisée
+      const dataToSend = {
+        ...formData,
+        vehicleBrand:
+          formData.vehicleBrand === 'Autre'
+            ? formData.vehicleBrandCustom
+            : formData.vehicleBrand,
+      };
+      // Retirer vehicleBrandCustom du payload envoyé
+      delete dataToSend.vehicleBrandCustom;
+
+      await axios.post('http://localhost:3001/appointments', dataToSend);
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
@@ -119,14 +118,20 @@ const Appointments: React.FC = () => {
   const isStepValid = (step: number) => {
     switch (step) {
       case 1:
-        return formData.name && formData.email && formData.phone;
+        return (
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.phone &&
+          formData.phone.length >= 12
+        );
       case 2:
         return (
           formData.vehicleRegistration &&
           formData.vehicleType &&
           formData.vehicleBrand &&
-          formData.vehicleModel &&
-          formData.vehicleYear
+          (formData.vehicleBrand !== 'Autre' || formData.vehicleBrandCustom) &&
+          formData.vehicleModel
         );
       case 3:
         return formData.appointmentDate && formData.appointmentTime;
@@ -138,11 +143,16 @@ const Appointments: React.FC = () => {
   const vehicleTypes = [
     { value: 'Voiture', icon: '🚗', price: '70€' },
     { value: 'Moto', icon: '🏍️', price: '60€' },
-    { value: 'Camionnette', icon: '🚐', price: '80€' },
+    { value: 'Utilitaire', icon: '🚐', price: '80€' },
+    {
+      value: '4x4',
+      icon: '🚙',
+      price: '75€',
+      info: 'Sélectionnez 4x4 si votre véhicule possède 4 roues motrices, sont considérés comme 4X4 les SUV 4 roues motrices. Sélectionnez Voiture si vous possédez un SUV 2 roues motrices.',
+    },
+    { value: 'Camping-car', icon: '🚐', price: '90€' },
     { value: 'Collection', icon: '🏎️', price: '90€' },
   ];
-
-  const yearsList = getYearsList();
 
   return (
     <div className='appointments'>
@@ -179,8 +189,10 @@ const Appointments: React.FC = () => {
                 <div className='detail'>
                   <span className='icon'>🚗</span>
                   <span>
-                    {formData.vehicleBrand} {formData.vehicleModel} (
-                    {formData.vehicleYear}) - {formData.vehicleRegistration}
+                    {formData.vehicleBrand === 'Autre'
+                      ? formData.vehicleBrandCustom
+                      : formData.vehicleBrand}{' '}
+                    {formData.vehicleModel} - {formData.vehicleRegistration}
                   </span>
                 </div>
               </div>
@@ -189,14 +201,15 @@ const Appointments: React.FC = () => {
                   setSubmitted(false);
                   setCurrentStep(1);
                   const resetData = {
-                    name: '',
+                    firstName: '',
+                    lastName: '',
                     email: '',
-                    phone: '',
+                    phone: '+33',
                     vehicleRegistration: '',
                     vehicleType: 'Voiture',
                     vehicleBrand: '',
+                    vehicleBrandCustom: '',
                     vehicleModel: '',
-                    vehicleYear: new Date().getFullYear(),
                     fuelType: 'Essence',
                     appointmentDate: '',
                     appointmentTime: '',
@@ -270,17 +283,33 @@ const Appointments: React.FC = () => {
                     </div>
                     <div className='form-grid'>
                       <div className='form-group'>
-                        <label htmlFor='name'>
+                        <label htmlFor='firstName'>
                           <span className='label-icon'>👤</span>
-                          Nom complet *
+                          Prénom *
                         </label>
                         <input
                           type='text'
-                          id='name'
-                          name='name'
-                          value={formData.name}
+                          id='firstName'
+                          name='firstName'
+                          value={formData.firstName}
                           onChange={handleChange}
-                          placeholder='Votre nom et prénom'
+                          placeholder='Votre prénom'
+                          required
+                        />
+                      </div>
+
+                      <div className='form-group'>
+                        <label htmlFor='lastName'>
+                          <span className='label-icon'>👤</span>
+                          Nom *
+                        </label>
+                        <input
+                          type='text'
+                          id='lastName'
+                          name='lastName'
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          placeholder='Votre nom'
                           required
                         />
                       </div>
@@ -311,10 +340,80 @@ const Appointments: React.FC = () => {
                           id='phone'
                           name='phone'
                           value={formData.phone}
-                          onChange={handleChange}
-                          placeholder='06 12 34 56 78'
+                          onChange={e => {
+                            let value = e.target.value;
+
+                            // Retirer tous les espaces et caractères spéciaux sauf + au début
+                            value = value.replace(/\s/g, '');
+
+                            // Si l'utilisateur essaie de tout effacer, garder +33
+                            if (value === '' || value === '+') {
+                              setFormData({ ...formData, phone: '+33' });
+                              return;
+                            }
+
+                            // Si le numéro commence par 0 (format français local)
+                            if (value.startsWith('0')) {
+                              // Convertir 06... en +336...
+                              value = '+33' + value.substring(1);
+                            }
+                            // Si le numéro commence par +330 (erreur commune)
+                            else if (value.startsWith('+330')) {
+                              // Convertir +3306... en +336...
+                              value = '+33' + value.substring(4);
+                            }
+                            // Si le numéro ne commence pas par +33
+                            else if (!value.startsWith('+33')) {
+                              // Si c'est juste des chiffres, ajouter +33 devant
+                              if (/^\d/.test(value)) {
+                                value = '+33' + value;
+                              } else if (!value.startsWith('+')) {
+                                value = '+33';
+                              }
+                            }
+
+                            // Nettoyer : garder uniquement +33 suivi de chiffres
+                            const match = value.match(/^\+33(\d*)/);
+                            if (match) {
+                              value = '+33' + match[1].replace(/\D/g, '');
+                            } else {
+                              value = '+33';
+                            }
+
+                            // Limiter à 12 caractères (+33 + 9 chiffres max)
+                            if (value.length > 12) {
+                              value = value.substring(0, 12);
+                            }
+
+                            setFormData({ ...formData, phone: value });
+                          }}
+                          onFocus={e => {
+                            // Placer le curseur à la fin
+                            const input = e.target;
+                            setTimeout(() => {
+                              input.setSelectionRange(
+                                input.value.length,
+                                input.value.length
+                              );
+                            }, 0);
+                          }}
+                          placeholder='06 12 34 56 78 ou +33 6 12 34 56 78'
+                          pattern='\+33[1-9]\d{8}'
+                          title='Numéro français valide (ex: 0612345678 ou +33612345678)'
                           required
                         />
+                        <small
+                          style={{
+                            color: '#666',
+                            fontSize: '0.85rem',
+                            marginTop: '4px',
+                            display: 'block',
+                          }}
+                        >
+                          {formData.phone.length >= 12
+                            ? '✓ Numéro valide'
+                            : 'Tapez votre numéro (ex: 06 12 34 56 78)'}
+                        </small>
                       </div>
                     </div>
                     <div className='step-navigation'>
@@ -362,6 +461,20 @@ const Appointments: React.FC = () => {
                           </div>
                         ))}
                       </div>
+                      {formData.vehicleType === '4x4' && (
+                        <div className='info-box' style={{ marginTop: '15px' }}>
+                          <span className='icon'>ℹ️</span>
+                          <div>
+                            <p style={{ fontSize: '0.9rem', margin: 0 }}>
+                              <strong>Important :</strong> Sélectionnez 4x4 si
+                              votre véhicule possède 4 roues motrices. Sont
+                              considérés comme 4X4 les SUV 4 roues motrices.
+                              Sélectionnez Voiture si vous possédez un SUV 2
+                              roues motrices.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className='form-grid'>
@@ -386,50 +499,38 @@ const Appointments: React.FC = () => {
                         </select>
                       </div>
 
+                      {formData.vehicleBrand === 'Autre' && (
+                        <div className='form-group'>
+                          <label htmlFor='vehicleBrandCustom'>
+                            <span className='label-icon'>🏭</span>
+                            Quelle marque ? *
+                          </label>
+                          <input
+                            type='text'
+                            id='vehicleBrandCustom'
+                            name='vehicleBrandCustom'
+                            value={formData.vehicleBrandCustom || ''}
+                            onChange={handleChange}
+                            placeholder='Tapez la marque de votre véhicule'
+                            required
+                          />
+                        </div>
+                      )}
+
                       <div className='form-group'>
                         <label htmlFor='vehicleModel'>
                           <span className='label-icon'>🚙</span>
                           Modèle *
                         </label>
-                        <select
+                        <input
+                          type='text'
                           id='vehicleModel'
                           name='vehicleModel'
                           value={formData.vehicleModel}
                           onChange={handleChange}
-                          disabled={!formData.vehicleBrand}
+                          placeholder='Ex: Clio, 308, Golf...'
                           required
-                        >
-                          <option value=''>
-                            {formData.vehicleBrand
-                              ? 'Sélectionnez un modèle'
-                              : "Choisissez d'abord une marque"}
-                          </option>
-                          {availableModels.map(model => (
-                            <option key={model} value={model}>
-                              {model}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className='form-group'>
-                        <label htmlFor='vehicleYear'>
-                          <span className='label-icon'>📅</span>
-                          Année de mise en circulation *
-                        </label>
-                        <select
-                          id='vehicleYear'
-                          name='vehicleYear'
-                          value={formData.vehicleYear}
-                          onChange={handleChange}
-                          required
-                        >
-                          {yearsList.map(year => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
 
                       <div className='form-group'>
@@ -452,10 +553,10 @@ const Appointments: React.FC = () => {
                         </select>
                       </div>
 
-                      <div className='form-group full-width'>
+                      <div className='form-group'>
                         <label htmlFor='vehicleRegistration'>
-                          <span className='label-icon'>🏷️</span>
-                          Numéro d'immatriculation *
+                          <span className='label-icon'>�</span>
+                          Immatriculation *
                         </label>
                         <input
                           type='text'
@@ -463,8 +564,7 @@ const Appointments: React.FC = () => {
                           name='vehicleRegistration'
                           value={formData.vehicleRegistration}
                           onChange={handleChange}
-                          placeholder='AA-123-BB'
-                          style={{ textTransform: 'uppercase' }}
+                          placeholder='AB-123-CD'
                           required
                         />
                       </div>
@@ -569,7 +669,10 @@ const Appointments: React.FC = () => {
                       <div className='summary-section'>
                         <h4>👤 Vos informations</h4>
                         <p>
-                          <strong>Nom :</strong> {formData.name}
+                          <strong>Prénom :</strong> {formData.firstName}
+                        </p>
+                        <p>
+                          <strong>Nom :</strong> {formData.lastName}
                         </p>
                         <p>
                           <strong>Email :</strong> {formData.email}
@@ -585,8 +688,11 @@ const Appointments: React.FC = () => {
                           <strong>Type :</strong> {formData.vehicleType}
                         </p>
                         <p>
-                          <strong>Véhicule :</strong> {formData.vehicleBrand}{' '}
-                          {formData.vehicleModel} ({formData.vehicleYear})
+                          <strong>Véhicule :</strong>{' '}
+                          {formData.vehicleBrand === 'Autre'
+                            ? formData.vehicleBrandCustom
+                            : formData.vehicleBrand}{' '}
+                          {formData.vehicleModel}
                         </p>
                         <p>
                           <strong>Carburant :</strong> {formData.fuelType}

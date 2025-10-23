@@ -7,6 +7,14 @@ import {
   DaySlots,
   TimeSlot,
 } from '../dto/available-slots.dto.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/fr';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale('fr');
 
 @Injectable()
 export class SlotsService {
@@ -15,9 +23,8 @@ export class SlotsService {
     private appointmentRepository: Repository<Appointment>
   ) {}
 
-  // Configuration des horaires d'ouverture
+  private readonly TIMEZONE = 'Europe/Paris';
   private readonly OPENING_HOURS = {
-    // Lundi à Vendredi
     weekday: [
       '08:00',
       '08:30',
@@ -36,7 +43,6 @@ export class SlotsService {
       '17:00',
       '17:30',
     ],
-    // Samedi
     saturday: [
       '08:00',
       '08:30',
@@ -47,66 +53,43 @@ export class SlotsService {
       '11:00',
       '11:30',
     ],
-    // Dimanche (fermé)
     sunday: [],
   };
-
-  // Durée moyenne d'un contrôle technique (en minutes)
   private readonly SLOT_DURATION = 30;
-
-  // Capacité par créneau (nombre de véhicules simultanés)
   private readonly CAPACITY_PER_SLOT = 2;
-
-  /**
-   * Récupère les créneaux disponibles pour une semaine donnée
-   */
   async getAvailableSlots(
     weekOffset: number = 0
   ): Promise<AvailableSlotsResponseDto> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Calculer le début de la semaine (lundi)
+    const now = dayjs().tz(this.TIMEZONE);
+    const today = now.startOf('day');
     const startOfWeek = this.getStartOfWeek(today, weekOffset);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-
-    // Récupérer tous les rendez-vous de la semaine
+    const endOfWeek = startOfWeek.add(6, 'day');
     const appointments = await this.appointmentRepository.find({
       where: {
-        appointmentDate: Between(startOfWeek, endOfWeek),
+        appointmentDate: Between(startOfWeek.toDate(), endOfWeek.toDate()),
       },
     });
-
-    // Générer les créneaux pour chaque jour
     const days: DaySlots[] = [];
     for (let i = 0; i < 7; i++) {
-      const currentDate = new Date(startOfWeek);
-      currentDate.setDate(currentDate.getDate() + i);
-      const daySlots = this.generateDaySlots(currentDate, appointments);
+      const currentDate = startOfWeek.add(i, 'day');
+      const daySlots = this.generateDaySlots(currentDate, now, appointments);
       days.push(daySlots);
     }
-
     return {
       days,
-      weekStart: startOfWeek.toISOString().split('T')[0],
-      weekEnd: endOfWeek.toISOString().split('T')[0],
+      weekStart: startOfWeek.format('YYYY-MM-DD'),
+      weekEnd: endOfWeek.format('YYYY-MM-DD'),
     };
   }
 
-  /**
-   * Génère les créneaux pour un jour donné
-   */
-  private generateDaySlots(date: Date, appointments: Appointment[]): DaySlots {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const dateString = date.toISOString().split('T')[0];
-    const dayOfWeek = date.getDay(); // 0 = Dimanche, 6 = Samedi
-
-    // Déterminer les horaires selon le jour
+  private generateDaySlots(
+    date: dayjs.Dayjs,
+    now: dayjs.Dayjs,
+    appointments: Appointment[]
+  ): DaySlots {
+    const today = now.startOf('day');
+    const dateString = date.format('YYYY-MM-DD');
+    const dayOfWeek = date.day();
     let availableHours: string[];
     if (dayOfWeek === 0) {
       availableHours = this.OPENING_HOURS.sunday;
@@ -115,99 +98,76 @@ export class SlotsService {
     } else {
       availableHours = this.OPENING_HOURS.weekday;
     }
-
-    // Compter les réservations par créneau pour ce jour
     const reservationsBySlot = new Map<string, number>();
     appointments
       .filter(apt => {
-        const aptDate = new Date(apt.appointmentDate);
-        return aptDate.toISOString().split('T')[0] === dateString;
+        const aptDate = dayjs(apt.appointmentDate).tz(this.TIMEZONE);
+        return aptDate.format('YYYY-MM-DD') === dateString;
       })
       .forEach(apt => {
         const count = reservationsBySlot.get(apt.appointmentTime) || 0;
         reservationsBySlot.set(apt.appointmentTime, count + 1);
       });
-
-    // Générer les créneaux
-    const slots: TimeSlot[] = availableHours.map(time => {
-      const reservationCount = reservationsBySlot.get(time) || 0;
-      const isAvailable = reservationCount < this.CAPACITY_PER_SLOT;
-
-      return {
-        time,
-        available: isAvailable,
-        reserved: reservationCount > 0,
-      };
-    });
-
-    const isPast = date < today;
-    const isToday = dateString === today.toISOString().split('T')[0];
-    const isWithin24Hours = date < tomorrow;
-
+    const isToday = date.isSame(today, 'day');
+    const slots: TimeSlot[] = availableHours
+      .map(time => {
+        const reservationCount = reservationsBySlot.get(time) || 0;
+        const isAvailable = reservationCount < this.CAPACITY_PER_SLOT;
+        if (isToday) {
+          const [hours, minutes] = time.split(':').map(Number);
+          const slotTime = date.hour(hours).minute(minutes);
+          if (slotTime.isBefore(now)) {
+            return null;
+          }
+        }
+        return {
+          time,
+          available: isAvailable,
+          reserved: reservationCount > 0,
+        };
+      })
+      .filter(slot => slot !== null) as TimeSlot[];
+    const isPast = date.isBefore(today, 'day');
     return {
       date: dateString,
       dayName: this.getDayName(dayOfWeek),
       isToday,
       isPast,
-      isWithin24Hours,
+      isWithin24Hours: false,
       slots,
     };
   }
 
-  /**
-   * Valide qu'un créneau est disponible et réservable
-   */
   async validateSlot(
     date: string,
     time: string
   ): Promise<{ valid: boolean; message?: string }> {
-    const appointmentDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Vérifier si la date est dans le passé
-    if (appointmentDate < today) {
+    const now = dayjs().tz(this.TIMEZONE);
+    const appointmentDateTime = dayjs.tz(`${date} ${time}`, this.TIMEZONE);
+    if (appointmentDateTime.isBefore(now)) {
       return {
         valid: false,
         message: 'Impossible de réserver un rendez-vous dans le passé.',
       };
     }
-
-    // Vérifier si c'est dans moins de 24h
-    if (appointmentDate < tomorrow) {
-      return {
-        valid: false,
-        message:
-          "Les réservations doivent être faites au moins 24 heures à l'avance. Veuillez appeler le contrôle technique pour une réservation urgente.",
-      };
-    }
-
-    // Vérifier si le jour est fermé (dimanche)
-    const dayOfWeek = appointmentDate.getDay();
+    const dayOfWeek = appointmentDateTime.day();
     if (dayOfWeek === 0) {
       return {
         valid: false,
         message: 'Le contrôle technique est fermé le dimanche.',
       };
     }
-
-    // Vérifier si l'horaire est valide
     const availableHours =
       dayOfWeek === 6
         ? this.OPENING_HOURS.saturday
         : this.OPENING_HOURS.weekday;
-
     if (!availableHours.includes(time)) {
       return {
         valid: false,
         message: "Cet horaire n'est pas disponible.",
       };
     }
-
-    // Vérifier la capacité
+    const appointmentDate = appointmentDateTime.toDate();
     const existingAppointments = await this.appointmentRepository.count({
       where: {
         appointmentDate: appointmentDate,
@@ -224,10 +184,6 @@ export class SlotsService {
 
     return { valid: true };
   }
-
-  /**
-   * Retourne le nom du jour en français
-   */
   private getDayName(dayOfWeek: number): string {
     const days = [
       'Dimanche',
@@ -241,15 +197,12 @@ export class SlotsService {
     return days[dayOfWeek];
   }
 
-  /**
-   * Calcule le début de la semaine (lundi)
-   */
-  private getStartOfWeek(date: Date, weekOffset: number = 0): Date {
-    const result = new Date(date);
-    const day = result.getDay();
-    const diff = (day === 0 ? -6 : 1) - day; // Lundi = jour 1
-    result.setDate(result.getDate() + diff + weekOffset * 7);
-    result.setHours(0, 0, 0, 0);
-    return result;
+  private getStartOfWeek(
+    date: dayjs.Dayjs,
+    weekOffset: number = 0
+  ): dayjs.Dayjs {
+    const dayOfWeek = date.day();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    return date.subtract(daysToMonday, 'day').add(weekOffset * 7, 'day');
   }
 }

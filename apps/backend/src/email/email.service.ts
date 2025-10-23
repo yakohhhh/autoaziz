@@ -11,7 +11,7 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       host: this.configService.get<string>('SMTP_HOST'),
       port: parseInt(this.configService.get<string>('SMTP_PORT') || '587'),
-      secure: this.configService.get<string>('SMTP_PORT') === '465', // true for 465, false for other ports
+      secure: this.configService.get<string>('SMTP_PORT') === '465',
       auth: {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASSWORD'),
@@ -20,8 +20,6 @@ export class EmailService {
         rejectUnauthorized: false,
       },
     });
-
-    // Verify connection configuration on startup
     void this.verifyConnection();
   }
 
@@ -167,28 +165,28 @@ export class EmailService {
             <h2 style="color: #2563eb;">Vérification de votre rendez-vous</h2>
             <p>Bonjour <strong>${name}</strong>,</p>
             <p>Pour confirmer votre rendez-vous, vous devez vérifier votre adresse email et votre numéro de téléphone.</p>
-            
+
             <div style="background-color: #f3f4f6; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center;">
               <h3 style="color: #1f2937; margin-bottom: 10px;">Votre code de vérification :</h3>
               <div style="font-size: 32px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">${verificationCode}</div>
             </div>
-            
+
             <p>Vous pouvez également cliquer sur ce lien pour vérifier automatiquement :</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${verificationUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                 Vérifier mon rendez-vous
               </a>
             </div>
-            
+
             <p><strong>Important :</strong></p>
             <ul>
               <li>Ce code expire dans 10 minutes</li>
               <li>Vous recevrez également un SMS avec le même code</li>
               <li>Votre rendez-vous ne sera confirmé qu'après vérification complète</li>
             </ul>
-            
+
             <p>Si vous n'avez pas demandé ce rendez-vous, veuillez ignorer cet email.</p>
-            
+
             <br>
             <p>Cordialement,<br>L'équipe Auto Aziz</p>
           </div>
@@ -221,22 +219,42 @@ export class EmailService {
             <p>Félicitations ! Votre rendez-vous a été confirmé avec succès.</p>
             
             <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0;">
-              <h3 style="color: #1f2937; margin-top: 0;">Détails de votre rendez-vous :</h3>
-              <p><strong>Date :</strong> ${appointmentDate}</p>
-              <p><strong>Heure :</strong> ${appointmentTime}</p>
-              <p><strong>Statut :</strong> <span style="color: #16a34a; font-weight: bold;">Confirmé</span></p>
+              <h3 style="color: #1f2937; margin-top: 0;">📅 Détails de votre rendez-vous</h3>
+              <p style="margin: 8px 0;"><strong>Date :</strong> ${appointmentDate}</p>
+              <p style="margin: 8px 0;"><strong>Heure :</strong> ${appointmentTime}</p>
+              <p style="margin: 8px 0;"><strong>Adresse :</strong> Auto Aziz - [Votre adresse complète]</p>
+              <p style="margin: 8px 0;"><strong>Statut :</strong> <span style="color: #16a34a; font-weight: bold;">✓ Confirmé</span></p>
             </div>
             
-            <p><strong>Rappels importants :</strong></p>
-            <ul>
-              <li>Merci de vous présenter 10 minutes avant l'heure du rendez-vous</li>
-              <li>N'oubliez pas d'apporter vos papiers du véhicule</li>
-              <li>Vous recevrez un SMS de rappel 24h avant</li>
-            </ul>
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">📋 Documents à apporter</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Carte grise</strong> du véhicule (obligatoire)</li>
+                <li>Vos papiers d'identité</li>
+              </ul>
+            </div>
             
-            <p>Merci de votre confiance !</p>
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚠️ Important - Véhicule Diesel</h3>
+              <p style="margin: 8px 0;"><strong>Si votre véhicule est diesel :</strong></p>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Merci de <strong>laisser chauffer votre véhicule à l'extérieur</strong> avant le contrôle</li>
+                <li>Cela permet d'obtenir des mesures plus précises lors du test antipollution</li>
+              </ul>
+            </div>
+            
+            <div style="background-color: #f3f4f6; padding: 20px; margin: 20px 0; border-radius: 8px;">
+              <h3 style="color: #1f2937; margin-top: 0;">📌 Rappels pratiques</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Merci de vous présenter <strong>10 minutes avant</strong> l'heure du rendez-vous</li>
+                <li>Vous recevrez un SMS de rappel 24h avant</li>
+                <li>En cas d'empêchement, merci de nous prévenir au plus tôt</li>
+              </ul>
+            </div>
+            
+            <p style="margin-top: 30px;">Merci de votre confiance !</p>
             <br>
-            <p>L'équipe Auto Aziz</p>
+            <p><strong>L'équipe Auto Aziz</strong></p>
           </div>
         `,
       });

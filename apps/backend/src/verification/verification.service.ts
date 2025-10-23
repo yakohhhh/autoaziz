@@ -45,10 +45,11 @@ export class VerificationService {
     });
 
     // Envoie le code par email et SMS
+    const fullName = `${appointment.firstName} ${appointment.lastName}`;
     await Promise.all([
       this.emailService.sendVerificationEmail(
         appointment.email,
-        appointment.name,
+        fullName,
         verificationCode,
         appointmentId
       ),
@@ -139,16 +140,17 @@ export class VerificationService {
     });
 
     // Envoie l'email de confirmation final
+    const fullName = `${appointment.firstName} ${appointment.lastName}`;
     await this.emailService.sendAppointmentConfirmedEmail(
       appointment.email,
-      appointment.name,
+      fullName,
       appointment.appointmentDate.toString(),
       appointment.appointmentTime
     );
 
     // Notifie l'admin
     await this.emailService.notifyAdminNewAppointment(
-      appointment.name,
+      fullName,
       appointment.email,
       appointment.phone,
       appointment.appointmentDate.toString(),

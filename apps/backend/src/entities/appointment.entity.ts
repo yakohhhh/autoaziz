@@ -14,7 +14,11 @@ export class Appointment {
 
   @ApiProperty()
   @Column()
-  name: string;
+  firstName: string;
+
+  @ApiProperty()
+  @Column()
+  lastName: string;
 
   @ApiProperty()
   @Column()
@@ -39,10 +43,6 @@ export class Appointment {
   @ApiProperty()
   @Column({ name: 'vehicleModel' })
   vehicleModel: string;
-
-  @ApiProperty()
-  @Column({ name: 'vehicleYear' })
-  vehicleYear: number;
 
   @ApiProperty()
   @Column({ name: 'fuelType', nullable: true })

@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String   @db.Text
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  @@map("contacts")
+}
+
+model Appointment {
+  id                       Int       @id @default(autoincrement())
+  firstName                String
+  lastName                 String
+  email                    String
+  phone                    String
+  vehicleRegistration      String
+  vehicleType              String
+  vehicleBrand             String
+  vehicleModel             String
+  fuelType                 String?
+  appointmentDate          DateTime  @db.Date
+  appointmentTime          String
+  status                   String    @default("pending_verification")
+  verificationCode         String?
+  emailVerified            Boolean?
+  phoneVerified            Boolean?
+  verificationCodeExpiry   DateTime?
+  notes                    String?   @db.Text
+  createdAt                DateTime  @default(now())
+
+  @@map("appointments")
+}

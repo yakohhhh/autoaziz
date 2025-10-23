@@ -133,3 +133,8 @@ temp/
 .stylelintcache
 *.tgz
 *.tar.gz
+
+.github/workflows/
+.github/dependabot.yml
+
+docs/

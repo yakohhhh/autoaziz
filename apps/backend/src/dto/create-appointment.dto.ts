@@ -4,25 +4,32 @@ import {
   IsString,
   IsDateString,
   IsOptional,
-  IsNumber,
-  Min,
-  Max,
+  Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAppointmentDto {
-  @ApiProperty({ example: 'Jean Dupont' })
+  @ApiProperty({ example: 'Jean' })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({ example: 'Dupont' })
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
 
   @ApiProperty({ example: 'jean.dupont@example.com' })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: '0612345678' })
+  @ApiProperty({ example: '+33612345678' })
   @IsNotEmpty()
   @IsString()
+  @Matches(/^\+33[1-9]\d{8}$/, {
+    message:
+      'Le numéro de téléphone doit être au format français: +33 suivi de 9 chiffres',
+  })
   phone: string;
 
   @ApiProperty({ example: 'AB-123-CD' })
@@ -47,13 +54,6 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   @IsString()
   vehicleModel: string;
-
-  @ApiProperty({ example: 2020, description: 'Année de mise en circulation' })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1950)
-  @Max(new Date().getFullYear() + 1)
-  vehicleYear: number;
 
   @ApiProperty({
     example: 'Essence',

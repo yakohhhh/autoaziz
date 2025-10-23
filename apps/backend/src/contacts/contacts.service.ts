@@ -16,20 +16,15 @@ export class ContactsService {
   async create(createContactDto: CreateContactDto): Promise<Contact> {
     const contact = this.contactRepository.create(createContactDto);
     const savedContact = await this.contactRepository.save(contact);
-
-    // Send confirmation email to user
     await this.emailService.sendContactConfirmation(
       createContactDto.email,
       createContactDto.name
     );
-
-    // Notify admin
     await this.emailService.notifyAdminNewContact(
       createContactDto.name,
       createContactDto.email,
       createContactDto.message
     );
-
     return savedContact;
   }
 

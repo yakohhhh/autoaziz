@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { ContactsModule } from './contacts/contacts.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { EmailModule } from './email/email.module';
+import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 import { Contact } from './entities/contact.entity';
 import { Appointment } from './entities/appointment.entity';
 
@@ -25,12 +27,14 @@ import { Appointment } from './entities/appointment.entity';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [Contact, Appointment],
-        synchronize: true, // Set to false in production
+        synchronize: false, // Désactivé pour éviter les conflits - utiliser les migrations SQL
       }),
     }),
     ContactsModule,
     AppointmentsModule,
     EmailModule,
+    AuthModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

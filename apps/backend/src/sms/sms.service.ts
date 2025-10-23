@@ -10,11 +10,10 @@ export class SmsService {
   async sendVerificationSms(phone: string, code: string): Promise<void> {
     try {
       // Pour l'instant, on simule l'envoi SMS
-      // Dans un vrai projet, vous pourriez utiliser Twilio, AWS SNS, ou autre service SMS
+      // Plus tard, on devra utiliser Twilio, AWS SNS, ou autre service SMS
       this.logger.log(
         `SMS Simulation - Sending to ${phone}: Votre code de vérification Auto Aziz est: ${code}`
       );
-
       // Simulation d'une attente réseau
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -25,10 +24,8 @@ export class SmsService {
       //   from: this.configService.get('TWILIO_PHONE_NUMBER'),
       //   to: phone
       // });
-
       // Pour les tests, on peut aussi utiliser une API gratuite comme SMS API
       // ou configurer un webhook pour recevoir les SMS sur une URL de test
-
       this.logger.log(`Verification SMS sent successfully to ${phone}`);
     } catch (error) {
       this.logger.error(

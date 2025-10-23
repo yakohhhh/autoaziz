@@ -17,7 +17,35 @@ autoaziz/
 └── .github/               # CI/CD GitHub Actions
 ```
 
-## 🚀 Démarrage rapide
+## 🚀 Démarrage ULTRA-RAPIDE ⭐
+
+### Tout en une commande !
+
+```bash
+# Lancer TOUT (PostgreSQL + Backend + Frontend)
+./launch-all.sh
+```
+
+Le script s'occupe de tout :
+- ✅ Démarre PostgreSQL automatiquement
+- ✅ Crée la base de données si besoin
+- ✅ Lance le backend (NestJS)
+- ✅ Lance le frontend (React)
+- ✅ Ouvre le navigateur
+
+**Accès direct :** http://localhost:3000/login
+- **Email:** `admin@autosur.com`
+- **Password:** `admin123`
+
+### Pour arrêter tous les services
+
+```bash
+./scripts/stop-all.sh
+```
+
+---
+
+## 📖 Méthode manuelle (alternative)
 
 ### Prérequis
 - Node.js 18+
@@ -36,10 +64,21 @@ npm install
 
 # Installer les dépendances frontend  
 cd ../frontend
-npm install --legacy-peer-deps
+npm install
 ```
 
-### Lancement en développement
+### Lancement manuel
+
+**Option 1 : Scripts séparés**
+```bash
+# Terminal 1 - Backend (avec PostgreSQL)
+./launch-backend.sh
+
+# Terminal 2 - Frontend
+./launch-frontend.sh
+```
+
+**Option 2 : Commandes npm classiques**
 ```bash
 # Backend (API)
 cd apps/backend
