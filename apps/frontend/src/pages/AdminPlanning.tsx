@@ -111,7 +111,7 @@ const AdminPlanning: React.FC = () => {
   };
 
   const getEventStyle = (event: AppointmentEvent) => {
-    const statusColors = {
+    const statusColors: Record<string, string> = {
       pending_verification: '#f59e0b',
       pending: '#3b82f6',
       completed: '#10b981',
