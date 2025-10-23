@@ -9,12 +9,11 @@ export class CalendarService {
     this.prisma = new PrismaClient();
   }
 
-  async getCalendarAppointments(
-    start?: string,
-    end?: string,
-    status?: string
-  ) {
-    const where: any = {};
+  async getCalendarAppointments(start?: string, end?: string, status?: string) {
+    const where: {
+      appointmentDate?: { gte: Date; lte: Date };
+      status?: string;
+    } = {};
 
     if (start && end) {
       where.appointmentDate = {
@@ -49,25 +48,28 @@ export class CalendarService {
     });
 
     // Format pour react-big-calendar ou FullCalendar
-    return appointments.map((apt) => ({
-      id: apt.id,
-      title: `${apt.firstName} ${apt.lastName} - ${apt.vehicleType}`,
-      start: new Date(`${apt.appointmentDate.toISOString().split('T')[0]}T${apt.appointmentTime}`),
-      end: new Date(`${apt.appointmentDate.toISOString().split('T')[0]}T${apt.appointmentTime}`),
-      resource: {
+    return appointments.map(apt => {
+      const dateStr = apt.appointmentDate.toISOString().split('T')[0];
+      return {
         id: apt.id,
-        customerName: `${apt.firstName} ${apt.lastName}`,
-        email: apt.email,
-        phone: apt.phone,
-        vehicleType: apt.vehicleType,
-        vehicleBrand: apt.vehicleBrand,
-        vehicleModel: apt.vehicleModel,
-        vehicleRegistration: apt.vehicleRegistration,
-        time: apt.appointmentTime,
-        status: apt.status,
-        notes: apt.notes,
-      },
-    }));
+        title: `${apt.firstName} ${apt.lastName} - ${apt.vehicleType}`,
+        start: new Date(`${dateStr}T${apt.appointmentTime}`),
+        end: new Date(`${dateStr}T${apt.appointmentTime}`),
+        resource: {
+          id: apt.id,
+          customerName: `${apt.firstName} ${apt.lastName}`,
+          email: apt.email,
+          phone: apt.phone,
+          vehicleType: apt.vehicleType,
+          vehicleBrand: apt.vehicleBrand,
+          vehicleModel: apt.vehicleModel,
+          vehicleRegistration: apt.vehicleRegistration,
+          time: apt.appointmentTime,
+          status: apt.status,
+          notes: apt.notes,
+        },
+      };
+    });
   }
 
   async updateAppointmentStatus(id: number, status: string) {
@@ -92,7 +94,7 @@ export class CalendarService {
 
   async getSlotAvailability(date: string) {
     const targetDate = new Date(date);
-    
+
     // Récupérer tous les RDV du jour
     const appointments = await this.prisma.appointment.findMany({
       where: {
@@ -104,20 +106,33 @@ export class CalendarService {
 
     // Tous les créneaux disponibles (de 8h à 18h)
     const allSlots = [
-      '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-      '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
-      '16:00', '16:30', '17:00', '17:30',
+      '08:00',
+      '08:30',
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+      '11:30',
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+      '17:00',
+      '17:30',
     ];
 
-    const bookedSlots = appointments.map((apt) => apt.appointmentTime);
-    const availableSlots = allSlots.filter((slot) => !bookedSlots.includes(slot));
+    const bookedSlots = appointments.map(apt => apt.appointmentTime);
+    const availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));
 
     return {
       date,
       totalSlots: allSlots.length,
       bookedSlots: bookedSlots.length,
       availableSlots: availableSlots.length,
-      slots: allSlots.map((slot) => ({
+      slots: allSlots.map(slot => ({
         time: slot,
         available: !bookedSlots.includes(slot),
       })),

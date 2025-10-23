@@ -17,8 +17,8 @@ export class AdminService {
     // Stats globales
     const totalAppointments = await this.prisma.appointment.count();
     const pendingAppointments = await this.prisma.appointment.count({
-      where: { 
-        status: { in: ['pending_verification', 'pending'] } 
+      where: {
+        status: { in: ['pending_verification', 'pending'] },
       },
     });
     const completedAppointments = await this.prisma.appointment.count({
@@ -32,21 +32,21 @@ export class AdminService {
     const appointments = await this.prisma.appointment.findMany({
       where: {
         status: 'completed',
-        createdAt: { gte: startOfMonth }
+        createdAt: { gte: startOfMonth },
       },
       select: { vehicleType: true },
     });
 
     const revenue = appointments.reduce((total, apt) => {
-      const prices = {
-        'Voiture': 70,
-        'Moto': 60,
-        'Utilitaire': 80,
+      const prices: Record<string, number> = {
+        Voiture: 70,
+        Moto: 60,
+        Utilitaire: 80,
         '4x4': 75,
         'Camping-car': 90,
-        'Collection': 80,
+        Collection: 80,
       };
-      return total + (prices[apt.vehicleType] || 70);
+      return total + (prices[apt.vehicleType] ?? 70);
     }, 0);
 
     // Nouveaux clients (basé sur les emails uniques)
@@ -109,17 +109,17 @@ export class AdminService {
     });
 
     // Calcul du prix par véhicule
-    const prices = {
-      'Voiture': 70,
-      'Moto': 60,
-      'Utilitaire': 80,
+    const prices: Record<string, number> = {
+      Voiture: 70,
+      Moto: 60,
+      Utilitaire: 80,
       '4x4': 75,
       'Camping-car': 90,
-      'Collection': 80,
+      Collection: 80,
     };
 
     // Initialiser les données mensuelles
-    const monthlyRevenue = {
+    const monthlyRevenue: Record<number, number[]> = {
       [lastYear]: Array(12).fill(0),
       [currentYear]: Array(12).fill(0),
     };
@@ -129,15 +129,28 @@ export class AdminService {
       const date = new Date(apt.appointmentDate);
       const year = date.getFullYear();
       const month = date.getMonth();
-      const price = prices[apt.vehicleType] || 70;
-      
+      const price = prices[apt.vehicleType] ?? 70;
+
       if (monthlyRevenue[year]) {
         monthlyRevenue[year][month] += price;
       }
     });
 
     return {
-      labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+      labels: [
+        'Jan',
+        'Fév',
+        'Mar',
+        'Avr',
+        'Mai',
+        'Juin',
+        'Juil',
+        'Août',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Déc',
+      ],
       datasets: [
         {
           label: `Année ${lastYear}`,
