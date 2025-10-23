@@ -43,4 +43,7 @@ model Appointment {
   createdAt                DateTime  @default(now())
 
   @@map("appointments")
+  @@index([email])
+  @@index([appointmentDate])
+  @@index([status])
 }
