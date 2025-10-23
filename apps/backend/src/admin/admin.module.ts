@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
-// TODO: Importer les modules nécessaires
-// import { TypeOrmModule } from '@nestjs/typeorm';
-// import { Appointment } from '../entities/appointment.entity';
+import { CalendarController } from './calendar.controller';
+import { CalendarService } from './calendar.service';
 
 @Module({
-  // TODO: Ajouter les imports nécessaires
-  // imports: [TypeOrmModule.forFeature([Appointment])],
-  controllers: [AdminController],
-  providers: [AdminService],
-  exports: [AdminService],
+  controllers: [AdminController, CalendarController],
+  providers: [AdminService, CalendarService],
+  exports: [AdminService, CalendarService],
 })
 export class AdminModule {}

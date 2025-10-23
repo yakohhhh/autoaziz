@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { DashboardStatsDto } from '../dto/dashboard-stats.dto';
 
@@ -7,10 +7,8 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('stats')
-  async getStats(
-    @Query('range') range: string = 'month',
-  ): Promise<DashboardStatsDto> {
-    return this.adminService.getDashboardStats(range);
+  async getStats(): Promise<DashboardStatsDto> {
+    return this.adminService.getDashboardStats();
   }
 
   @Get('appointments/recent')
@@ -19,7 +17,17 @@ export class AdminController {
   }
 
   @Get('revenue/chart')
-  async getRevenueChart(@Query('range') range: string = 'month') {
-    return this.adminService.getRevenueChart(range);
+  async getRevenueChart() {
+    return this.adminService.getRevenueChart();
+  }
+
+  @Get('stats/vehicle-types')
+  async getVehicleTypeStats() {
+    return this.adminService.getVehicleTypeStats();
+  }
+
+  @Get('stats/top-timeslots')
+  async getTopTimeSlots() {
+    return this.adminService.getTopTimeSlots();
   }
 }

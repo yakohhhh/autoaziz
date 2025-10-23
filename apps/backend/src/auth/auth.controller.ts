@@ -14,7 +14,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(): Promise<{ message: string }> {
+  logout(): { message: string } {
     return { message: 'Déconnexion réussie' };
   }
 }

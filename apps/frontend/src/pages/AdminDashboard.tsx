@@ -58,13 +58,13 @@ const AdminDashboard: React.FC = () => {
       periode: 'Sept 2025',
       Web: 250,
       Telephone: 180,
-      Contre: 120,
+      Contrôle: 120,
     },
     {
       periode: 'Oct 2025',
       Web: 270,
       Telephone: 150,
-      Contre: 100,
+      Contrôle: 100,
     },
   ];
 
@@ -134,9 +134,9 @@ const AdminDashboard: React.FC = () => {
             <span className='icon'>📊</span>
             <span>Tableau de bord</span>
           </a>
-          <a href='#' className='nav-item'>
+          <a href='/admin/planning' className='nav-item'>
             <span className='icon'>📅</span>
-            <span>Rendez-vous</span>
+            <span>Planning</span>
           </a>
           <a href='#' className='nav-item'>
             <span className='icon'>👥</span>
@@ -288,7 +288,7 @@ const AdminDashboard: React.FC = () => {
                 <Legend />
                 <Bar dataKey='Web' fill='#70AD47' name='Web' />
                 <Bar dataKey='Telephone' fill='#FFC000' name='Téléphone' />
-                <Bar dataKey='Contre' fill='#C00000' name='Contre' />
+                <Bar dataKey='Controle' fill='#C00000' name='Contrôle' />
               </BarChart>
             </ResponsiveContainer>
           </div>

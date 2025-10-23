@@ -10,6 +10,7 @@ import Appointments from './pages/Appointments';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminPlanning from './pages/AdminPlanning';
 import './App.css';
 
 function App() {
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin/planning'
+            element={
+              <ProtectedRoute>
+                <AdminPlanning />
               </ProtectedRoute>
             }
           />

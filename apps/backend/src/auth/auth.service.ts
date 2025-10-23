@@ -12,7 +12,7 @@ export class AuthService {
   //   private readonly jwtService: JwtService,
   // ) {}
 
-  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+  login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
     // TODO: Remplacer par une vraie validation en base de données
@@ -34,7 +34,7 @@ export class AuthService {
 
       const mockToken = 'mock-jwt-token-' + Date.now();
 
-      return {
+      return Promise.resolve({
         token: mockToken,
         user: {
           id: '1',
@@ -42,7 +42,7 @@ export class AuthService {
           email: 'admin@autosur.com',
           role: 'admin',
         },
-      };
+      });
     }
 
     throw new UnauthorizedException('Email ou mot de passe incorrect');
