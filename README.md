@@ -8,14 +8,21 @@
 autoaziz/
 ├── apps/                    # Applications principales
 │   ├── backend/            # API NestJS
-│   ├── frontend/           # Interface React
+│   ├── frontend/           # Interface React ⭐ Architecture restructurée !
 │   └── database/           # Configuration PostgreSQL
 ├── docs/                   # Documentation complète
+│   ├── NEW_ARCHITECTURE.md      # 📘 Documentation de la nouvelle architecture
+│   ├── ARCHITECTURE_GUIDE.md    # 📗 Guide de démarrage
+│   ├── MIGRATION_GUIDE.md       # 📙 Guide de migration
+│   └── ...                      # Autres documentations
 ├── scripts/                # Scripts d'automatisation
 ├── infrastructure/         # Docker & déploiement
 ├── tools/                  # Outils de développement
 └── .github/               # CI/CD GitHub Actions
 ```
+
+> 🎉 **Nouveau !** Le frontend a été restructuré selon les meilleures pratiques React/TypeScript.  
+> Consultez [NEW_ARCHITECTURE.md](docs/NEW_ARCHITECTURE.md) pour plus de détails.
 
 ## 🚀 Démarrage ULTRA-RAPIDE ⭐
 
@@ -102,9 +109,18 @@ npm start
 ### 🎨 Frontend (React)
 - **Localisation** : `apps/frontend/`  
 - **Interface moderne** avec TypeScript
+- **Architecture restructurée** (Oct 2025) 🆕
+  - Pages organisées par contexte (public, admin, auth)
+  - Composants organisés par fonction (layout, common, calendar)
+  - Hooks personnalisés pour la logique réutilisable
+  - Services API centralisés
+  - Types TypeScript centralisés
+  - Barrel exports pour imports simplifiés
 - **Carte interactive** Leaflet/OpenStreetMap
 - **Formulaires** de prise de rendez-vous
 - **Vérification** temps réel des codes
+
+> 📖 **Documentation détaillée** : [NEW_ARCHITECTURE.md](docs/NEW_ARCHITECTURE.md)
 
 ## 🛠️ Scripts disponibles
 
@@ -145,6 +161,9 @@ docker-compose -f infrastructure/docker-compose.prod.yml up -d
 ## 📚 Documentation
 
 Consultez le dossier `docs/` pour :
+- **🆕 [Nouvelle Architecture](docs/NEW_ARCHITECTURE.md)** - Documentation complète de la restructuration
+- **🆕 [Guide d'Architecture](docs/ARCHITECTURE_GUIDE.md)** - Guide de démarrage rapide
+- **🆕 [Guide de Migration](docs/MIGRATION_GUIDE.md)** - Comparaison avant/après
 - [Guide de déploiement](docs/DEPLOYMENT.md)
 - [Configuration ESLint](docs/ESLINT_SETUP.md) 
 - [Secrets GitHub](docs/GITHUB_SECRETS_GUIDE.md)

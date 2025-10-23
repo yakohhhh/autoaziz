@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import WeeklyCalendar from '../components/WeeklyCalendar';
-import { VEHICLE_BRANDS, FUEL_TYPES } from '../utils/vehicleData';
+import { WeeklyCalendar } from '../../components';
+import { VEHICLE_BRANDS, FUEL_TYPES } from '../../utils/vehicleData';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {

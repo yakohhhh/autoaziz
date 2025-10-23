@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from '../../generated/prisma';
 import { DashboardStatsDto } from '../dto/dashboard-stats.dto';
 
 @Injectable()
@@ -30,7 +30,7 @@ export class AdminService {
 
     // Revenus (basés sur le type de véhicule)
     const appointments = await this.prisma.appointment.findMany({
-      where: { 
+      where: {
         status: 'completed',
         createdAt: { gte: startOfMonth }
       },

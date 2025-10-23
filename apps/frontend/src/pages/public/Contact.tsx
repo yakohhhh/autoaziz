@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import '../utils/leafletFix';
+import '../../utils/leafletFix';
 import './Contact.css';
 
 const Contact: React.FC = () => {
