@@ -62,23 +62,31 @@ const AdminPlanning: React.FC = () => {
     try {
       if (!silent) setLoading(true);
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/admin/calendar/appointments', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        'http://localhost:3001/admin/calendar/appointments',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Erreur de chargement');
 
       const data = await response.json();
-      
+
       // Convertir les dates string en objets Date et améliorer le titre
-      const formattedEvents = data.map((event: any) => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end),
-        title: `🚗 ${event.resource.customerName} - ${event.resource.vehicleBrand} ${event.resource.vehicleModel}`,
-      }));
+      const formattedEvents = data.map((event: any) => {
+        const isManual = event.resource.notes?.includes('[MANUEL]') || false;
+        const sourceIcon = isManual ? '🟢' : '🌐';
+        
+        return {
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          title: `${sourceIcon} ${event.resource.customerName}\n${event.resource.vehicleBrand} ${event.resource.vehicleModel}\n📞 ${event.resource.phone}`,
+        };
+      });
 
       setEvents(formattedEvents);
     } catch (error) {
@@ -91,14 +99,17 @@ const AdminPlanning: React.FC = () => {
   const updateStatus = async (id: number, status: string) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/admin/calendar/appointments/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
+      const response = await fetch(
+        `http://localhost:3001/admin/calendar/appointments/${id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
 
       if (!response.ok) throw new Error('Erreur de mise à jour');
 
@@ -121,27 +132,21 @@ const AdminPlanning: React.FC = () => {
     let backgroundColor = '#3174ad';
     let borderColor = '#2563eb';
 
-    switch (event.resource.status) {
-      case 'pending':
-      case 'pending_verification':
-        backgroundColor = '#f59e0b'; // Orange
-        borderColor = '#d97706';
-        break;
-      case 'confirmed':
-        backgroundColor = '#10b981'; // Vert
-        borderColor = '#059669';
-        break;
-      case 'completed':
-        backgroundColor = '#6366f1'; // Violet
-        borderColor = '#4f46e5';
-        break;
-      case 'cancelled':
-        backgroundColor = '#ef4444'; // Rouge
-        borderColor = '#dc2626';
-        break;
-      default:
-        backgroundColor = '#6b7280'; // Gris
-        borderColor = '#4b5563';
+    // Différenciation par source : Manuel (vert) vs En ligne (jaune)
+    const isManual = event.resource.notes?.includes('[MANUEL]') || false;
+    
+    if (event.resource.status === 'cancelled') {
+      // Rouge pour annulé
+      backgroundColor = '#ef4444';
+      borderColor = '#dc2626';
+    } else if (isManual) {
+      // Vert pour RDV manuel (enregistré par admin)
+      backgroundColor = '#10b981';
+      borderColor = '#059669';
+    } else {
+      // Jaune pour RDV en ligne (pris par client)
+      backgroundColor = '#fbbf24';
+      borderColor = '#f59e0b';
     }
 
     return {
@@ -150,14 +155,14 @@ const AdminPlanning: React.FC = () => {
         borderLeft: `4px solid ${borderColor}`,
         borderRadius: '6px',
         opacity: 0.95,
-        color: 'white',
+        color: event.resource.status === 'cancelled' ? 'white' : '#1f2937',
         border: 'none',
         display: 'block',
-        padding: '4px 8px',
+        padding: '6px 10px',
         fontSize: '13px',
-        fontWeight: '500',
+        fontWeight: '600',
         cursor: 'pointer',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
         transition: 'all 0.2s ease',
       },
     };
@@ -166,7 +171,7 @@ const AdminPlanning: React.FC = () => {
   const filteredEvents =
     filter === 'all'
       ? events
-      : events.filter((e) => e.resource.status === filter);
+      : events.filter(e => e.resource.status === filter);
 
   const getStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
@@ -195,67 +200,99 @@ const AdminPlanning: React.FC = () => {
   };
 
   return (
-    <div className="admin-planning">
-      <div className="planning-header">
-        <div className="header-top">
-          <button onClick={() => navigate('/admin/dashboard')} className="back-btn">
+    <div className='admin-planning'>
+      <div className='planning-header'>
+        <div className='header-top'>
+          <button
+            onClick={() => navigate('/admin/dashboard')}
+            className='back-btn'
+          >
             ← Retour au Dashboard
           </button>
           <h1>📅 Planning des Rendez-vous</h1>
-          <button onClick={() => loadAppointments(false)} className="refresh-btn">
+          <button
+            onClick={() => loadAppointments(false)}
+            className='refresh-btn'
+          >
             🔄 Actualiser
           </button>
         </div>
 
-        <div className="filters">
-          <button 
-            className={filter === 'all' ? 'active' : ''} 
+        <div className='filters'>
+          <button
+            className={filter === 'all' ? 'active' : ''}
             onClick={() => setFilter('all')}
           >
             Tous ({events.length})
           </button>
-          <button 
-            className={filter === 'pending' ? 'active pending' : 'pending'} 
+          <button
+            className={filter === 'pending' ? 'active pending' : 'pending'}
             onClick={() => setFilter('pending')}
           >
-            ⏳ En attente ({events.filter(e => e.resource.status === 'pending').length})
+            ⏳ En attente (
+            {events.filter(e => e.resource.status === 'pending').length})
           </button>
-          <button 
-            className={filter === 'confirmed' ? 'active confirmed' : 'confirmed'} 
+          <button
+            className={
+              filter === 'confirmed' ? 'active confirmed' : 'confirmed'
+            }
             onClick={() => setFilter('confirmed')}
           >
-            ✅ Confirmés ({events.filter(e => e.resource.status === 'confirmed').length})
+            ✅ Confirmés (
+            {events.filter(e => e.resource.status === 'confirmed').length})
           </button>
-          <button 
-            className={filter === 'completed' ? 'active completed' : 'completed'} 
+          <button
+            className={
+              filter === 'completed' ? 'active completed' : 'completed'
+            }
             onClick={() => setFilter('completed')}
           >
-            🎉 Complétés ({events.filter(e => e.resource.status === 'completed').length})
+            🎉 Complétés (
+            {events.filter(e => e.resource.status === 'completed').length})
           </button>
-          <button 
-            className={filter === 'cancelled' ? 'active cancelled' : 'cancelled'} 
+          <button
+            className={
+              filter === 'cancelled' ? 'active cancelled' : 'cancelled'
+            }
             onClick={() => setFilter('cancelled')}
           >
-            Annulés ({events.filter(e => e.resource.status === 'cancelled').length})
+            Annulés (
+            {events.filter(e => e.resource.status === 'cancelled').length})
           </button>
+        </div>
+
+        <div className='legend'>
+          <div className='legend-title'>Légende :</div>
+          <div className='legend-item'>
+            <span className='legend-color manual'></span>
+            <span>🟢 RDV Manuel (Admin)</span>
+          </div>
+          <div className='legend-item'>
+            <span className='legend-color online'></span>
+            <span>🌐 RDV En Ligne (Client)</span>
+          </div>
+          <div className='legend-item'>
+            <span className='legend-color cancelled'></span>
+            <span>❌ Annulé</span>
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="loading">Chargement du planning...</div>
+        <div className='loading'>Chargement du planning...</div>
       ) : (
-        <div className="calendar-container">
+        <div className='calendar-container'>
           <Calendar
             localizer={localizer}
             events={filteredEvents}
-            startAccessor="start"
-            endAccessor="end"
+            startAccessor='start'
+            endAccessor='end'
             style={{ height: 800 }}
             onSelectEvent={handleSelectEvent}
             eventPropGetter={getEventStyle}
             messages={messages}
-            culture="fr"
-            defaultView="week"
+            culture='fr'
+            defaultView='week'
             views={['week', 'day', 'agenda']}
             step={30}
             timeslots={2}
@@ -267,79 +304,124 @@ const AdminPlanning: React.FC = () => {
       )}
 
       {showModal && selectedEvent && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className='modal-overlay' onClick={() => setShowModal(false)}>
+          <div className='modal-content' onClick={e => e.stopPropagation()}>
+            <div className='modal-header'>
               <h2>Détails du Rendez-vous #{selectedEvent.resource.id}</h2>
-              <button onClick={() => setShowModal(false)} className="close-btn">✕</button>
+              <button onClick={() => setShowModal(false)} className='close-btn'>
+                ✕
+              </button>
             </div>
 
-            <div className="modal-body">
-              <div className="info-section">
+            <div className='modal-body'>
+              <div className='info-section'>
                 <h3>👤 Client</h3>
-                <p><strong>Nom:</strong> {selectedEvent.resource.customerName}</p>
-                <p><strong>Email:</strong> {selectedEvent.resource.email}</p>
-                <p><strong>Téléphone:</strong> {selectedEvent.resource.phone}</p>
+                <p>
+                  <strong>Nom:</strong> {selectedEvent.resource.customerName}
+                </p>
+                <p>
+                  <strong>Email:</strong> {selectedEvent.resource.email}
+                </p>
+                <p>
+                  <strong>Téléphone:</strong> {selectedEvent.resource.phone}
+                </p>
               </div>
 
-              <div className="info-section">
+              <div className='info-section'>
                 <h3>🚗 Véhicule</h3>
-                <p><strong>Type:</strong> {selectedEvent.resource.vehicleType}</p>
-                <p><strong>Marque:</strong> {selectedEvent.resource.vehicleBrand}</p>
-                <p><strong>Modèle:</strong> {selectedEvent.resource.vehicleModel}</p>
-                <p><strong>Immatriculation:</strong> {selectedEvent.resource.vehicleRegistration}</p>
+                <p>
+                  <strong>Type:</strong> {selectedEvent.resource.vehicleType}
+                </p>
+                <p>
+                  <strong>Marque:</strong> {selectedEvent.resource.vehicleBrand}
+                </p>
+                <p>
+                  <strong>Modèle:</strong> {selectedEvent.resource.vehicleModel}
+                </p>
+                <p>
+                  <strong>Immatriculation:</strong>{' '}
+                  {selectedEvent.resource.vehicleRegistration}
+                </p>
               </div>
 
-              <div className="info-section">
+              <div className='info-section'>
                 <h3>📅 Rendez-vous</h3>
-                <p><strong>Date:</strong> {selectedEvent.start ? format(selectedEvent.start, 'dd MMMM yyyy', { locale: fr }) : 'N/A'}</p>
-                <p><strong>Heure:</strong> {selectedEvent.resource.time}</p>
-                <p><strong>Statut:</strong> 
-                  <span className={`status-badge ${selectedEvent.resource.status}`}>
+                <p>
+                  <strong>Date:</strong>{' '}
+                  {selectedEvent.start
+                    ? format(selectedEvent.start, 'dd MMMM yyyy', {
+                        locale: fr,
+                      })
+                    : 'N/A'}
+                </p>
+                <p>
+                  <strong>Heure:</strong> {selectedEvent.resource.time}
+                </p>
+                <p>
+                  <strong>Source:</strong>{' '}
+                  {selectedEvent.resource.notes?.includes('[MANUEL]') ? (
+                    <span className='source-badge manual'>🟢 RDV Manuel</span>
+                  ) : (
+                    <span className='source-badge online'>🌐 RDV En Ligne</span>
+                  )}
+                </p>
+                <p>
+                  <strong>Statut:</strong>
+                  <span
+                    className={`status-badge ${selectedEvent.resource.status}`}
+                  >
                     {getStatusLabel(selectedEvent.resource.status)}
                   </span>
                 </p>
               </div>
 
               {selectedEvent.resource.notes && (
-                <div className="info-section">
+                <div className='info-section'>
                   <h3>📝 Notes</h3>
                   <p>{selectedEvent.resource.notes}</p>
                 </div>
               )}
             </div>
 
-            <div className="modal-actions">
+            <div className='modal-actions'>
               <h3>⚙️ Changer le statut:</h3>
-              <div className="status-buttons">
+              <div className='status-buttons'>
                 {selectedEvent.resource.status !== 'pending' && (
-                  <button 
-                    onClick={() => updateStatus(selectedEvent.resource.id, 'pending')}
-                    className="btn-pending"
+                  <button
+                    onClick={() =>
+                      updateStatus(selectedEvent.resource.id, 'pending')
+                    }
+                    className='btn-pending'
                   >
                     ⏳ En attente
                   </button>
                 )}
                 {selectedEvent.resource.status !== 'confirmed' && (
-                  <button 
-                    onClick={() => updateStatus(selectedEvent.resource.id, 'confirmed')}
-                    className="btn-confirmed"
+                  <button
+                    onClick={() =>
+                      updateStatus(selectedEvent.resource.id, 'confirmed')
+                    }
+                    className='btn-confirmed'
                   >
                     ✅ Confirmer
                   </button>
                 )}
                 {selectedEvent.resource.status !== 'completed' && (
-                  <button 
-                    onClick={() => updateStatus(selectedEvent.resource.id, 'completed')}
-                    className="btn-completed"
+                  <button
+                    onClick={() =>
+                      updateStatus(selectedEvent.resource.id, 'completed')
+                    }
+                    className='btn-completed'
                   >
                     🎉 Terminer
                   </button>
                 )}
                 {selectedEvent.resource.status !== 'cancelled' && (
-                  <button 
-                    onClick={() => updateStatus(selectedEvent.resource.id, 'cancelled')}
-                    className="btn-cancelled"
+                  <button
+                    onClick={() =>
+                      updateStatus(selectedEvent.resource.id, 'cancelled')
+                    }
+                    className='btn-cancelled'
                   >
                     ❌ Annuler
                   </button>

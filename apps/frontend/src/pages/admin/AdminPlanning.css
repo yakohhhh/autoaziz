@@ -139,6 +139,50 @@
   border-color: #ef4444;
 }
 
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.legend-title {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.875rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-color.manual {
+  background: #10b981;
+}
+
+.legend-color.online {
+  background: #fbbf24;
+}
+
+.legend-color.cancelled {
+  background: #ef4444;
+}
+
 .loading {
   text-align: center;
   padding: 4rem;
@@ -203,42 +247,42 @@
 /* ÉVÉNEMENTS PROFESSIONNELS ET LISIBLES */
 .rbc-event {
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.5;
-  min-height: 50px;
-  overflow: hidden;
+  line-height: 1.4;
+  min-height: 70px;
+  overflow: visible;
   border-left: 3px solid transparent;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   cursor: pointer;
+  white-space: pre-line;
 }
 
 .rbc-event:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
   z-index: 10;
 }
 
 .rbc-event-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 4px;
-  opacity: 0.9;
+  margin-bottom: 3px;
+  opacity: 0.8;
 }
 
 .rbc-event-content {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   display: block;
-  white-space: normal;
+  white-space: pre-line;
   word-wrap: break-word;
-  overflow: hidden;
-  line-height: 1.4;
-  color: white;
+  overflow: visible;
+  line-height: 1.5;
 }
 
 /* Multi-lignes pour les événements */
@@ -248,14 +292,14 @@
 
 /* CRÉNEAUX HORAIRES OPTIMISÉS */
 .rbc-time-slot {
-  min-height: 55px !important;
-  height: 55px !important;
+  min-height: 50px !important;
+  height: 50px !important;
   border-top: 1px solid #f1f5f9;
 }
 
 .rbc-timeslot-group {
-  min-height: 110px !important;
-  height: 110px !important;
+  min-height: 100px !important;
+  height: 100px !important;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -524,6 +568,27 @@
 .status-badge.cancelled {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.source-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+.source-badge.manual {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.source-badge.online {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
 }
 
 .modal-actions {

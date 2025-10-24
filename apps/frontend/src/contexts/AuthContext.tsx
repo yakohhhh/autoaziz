@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('userData');
-    
+
     if (token && userData) {
       try {
         setUser(JSON.parse(userData));

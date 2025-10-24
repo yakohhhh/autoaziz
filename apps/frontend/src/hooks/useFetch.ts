@@ -13,7 +13,7 @@ export const useFetch = <T>(url: string) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(url, {
