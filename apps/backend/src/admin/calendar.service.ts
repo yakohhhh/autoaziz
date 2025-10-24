@@ -50,11 +50,15 @@ export class CalendarService {
     // Format pour react-big-calendar ou FullCalendar
     return appointments.map(apt => {
       const dateStr = apt.appointmentDate.toISOString().split('T')[0];
+      const startDate = new Date(`${dateStr}T${apt.appointmentTime}`);
+      const endDate = new Date(startDate);
+      endDate.setMinutes(endDate.getMinutes() + 30); // Durée de 30 minutes pour un contrôle technique
+
       return {
         id: apt.id,
         title: `${apt.firstName} ${apt.lastName} - ${apt.vehicleType}`,
-        start: new Date(`${dateStr}T${apt.appointmentTime}`),
-        end: new Date(`${dateStr}T${apt.appointmentTime}`),
+        start: startDate,
+        end: endDate,
         resource: {
           id: apt.id,
           customerName: `${apt.firstName} ${apt.lastName}`,

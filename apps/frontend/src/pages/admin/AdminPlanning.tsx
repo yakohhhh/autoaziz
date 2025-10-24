@@ -79,7 +79,7 @@ const AdminPlanning: React.FC = () => {
       const formattedEvents = data.map((event: any) => {
         const isManual = event.resource.notes?.includes('[MANUEL]') || false;
         const sourceIcon = isManual ? '🟢' : '🌐';
-        
+
         return {
           ...event,
           start: new Date(event.start),
@@ -134,7 +134,7 @@ const AdminPlanning: React.FC = () => {
 
     // Différenciation par source : Manuel (vert) vs En ligne (jaune)
     const isManual = event.resource.notes?.includes('[MANUEL]') || false;
-    
+
     if (event.resource.status === 'cancelled') {
       // Rouge pour annulé
       backgroundColor = '#ef4444';
@@ -294,11 +294,11 @@ const AdminPlanning: React.FC = () => {
             culture='fr'
             defaultView='week'
             views={['week', 'day', 'agenda']}
-            step={30}
-            timeslots={2}
-            min={new Date(2024, 0, 1, 8, 0, 0)}
+            step={15}
+            timeslots={4}
+            min={new Date(2024, 0, 1, 7, 0, 0)}
             max={new Date(2024, 0, 1, 20, 0, 0)}
-            scrollToTime={new Date(2024, 0, 1, 8, 0, 0)}
+            scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
           />
         </div>
       )}

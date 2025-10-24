@@ -246,11 +246,11 @@
 
 /* ÉVÉNEMENTS PROFESSIONNELS ET LISIBLES */
 .rbc-event {
-  padding: 8px 10px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 11px;
   font-weight: 600;
-  line-height: 1.4;
-  min-height: 70px;
+  line-height: 1.3;
+  min-height: 50px;
   overflow: visible;
   border-left: 3px solid transparent;
   border-radius: 4px;
@@ -266,23 +266,23 @@
 }
 
 .rbc-event-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   opacity: 0.8;
 }
 
 .rbc-event-content {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   display: block;
   white-space: pre-line;
   word-wrap: break-word;
   overflow: visible;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Multi-lignes pour les événements */
@@ -290,21 +290,26 @@
   max-height: none;
 }
 
-/* CRÉNEAUX HORAIRES OPTIMISÉS */
+/* CRÉNEAUX HORAIRES OPTIMISÉS - 15 minutes */
 .rbc-time-slot {
-  min-height: 50px !important;
-  height: 50px !important;
+  min-height: 25px !important;
+  height: 25px !important;
   border-top: 1px solid #f1f5f9;
 }
 
 .rbc-timeslot-group {
   min-height: 100px !important;
   height: 100px !important;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
 }
 
 .rbc-time-slot:first-child {
   border-top: none;
+}
+
+/* Ligne plus visible toutes les heures (4 x 15min) */
+.rbc-timeslot-group:nth-child(1) {
+  border-top: 2px solid #94a3b8;
 }
 
 .rbc-day-slot .rbc-event {
