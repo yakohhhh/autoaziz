@@ -2,6 +2,88 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminCustomers.css';
 
+// Composant pour éditer les notes
+const NotesEditor: React.FC<{
+  customerId: number;
+  initialNotes: string;
+  onSave: () => void;
+}> = ({ customerId, initialNotes, onSave }) => {
+  const [notes, setNotes] = useState(initialNotes);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/customers/${customerId}/notes`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ notes }),
+        }
+      );
+
+      if (response.ok) {
+        setEditing(false);
+        onSave();
+        alert('✅ Notes enregistrées avec succès');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className='notes-editor'>
+      {!editing ? (
+        <>
+          <p className='notes-display'>{notes || 'Aucune note'}</p>
+          <button onClick={() => setEditing(true)} className='btn-edit-notes'>
+            ✏️ Modifier
+          </button>
+        </>
+      ) : (
+        <>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            className='notes-textarea'
+            rows={5}
+            placeholder='Ajoutez vos notes ici...'
+          />
+          <div className='notes-actions'>
+            <button
+              onClick={() => {
+                setNotes(initialNotes);
+                setEditing(false);
+              }}
+              className='btn-cancel-notes'
+              disabled={saving}
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleSave}
+              className='btn-save-notes'
+              disabled={saving}
+            >
+              {saving ? '⏳ Sauvegarde...' : '✅ Enregistrer'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 interface Vehicle {
   id: number;
   licensePlate: string;
@@ -86,6 +168,13 @@ const AdminCustomers: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    navigate('/login');
+  };
+
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch =
       customer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -100,19 +189,65 @@ const AdminCustomers: React.FC = () => {
   });
 
   return (
-    <div className='customers-page'>
-      {/* Header */}
-      <div className='customers-header'>
-        <div className='header-left'>
-          <button onClick={() => navigate('/admin')} className='back-button'>
-            ← Retour
-          </button>
-          <h1>Gérer Mes Clients</h1>
+    <div className='admin-dashboard'>
+      <aside className='sidebar'>
+        <div className='sidebar-header'>
+          <h2>AUTOSUR</h2>
+          <p>Admin Panel</p>
         </div>
-        <div className='header-actions'>
-          <button className='btn-icon' title='Actualiser'>
-            🔄
+
+        <nav className='sidebar-nav'>
+          <a href='/admin/dashboard' className='nav-item'>
+            <span className='icon'>📊</span>
+            <span>Tableau de bord</span>
+          </a>
+          <a href='/admin/planning' className='nav-item'>
+            <span className='icon'>📅</span>
+            <span>Planning</span>
+          </a>
+          <a href='/admin/customers' className='nav-item active'>
+            <span className='icon'>👥</span>
+            <span>Clients</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>📈</span>
+            <span>Statistiques</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>💰</span>
+            <span>Finances</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>🎁</span>
+            <span>Promotions</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>📧</span>
+            <span>Messages</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>⚙️</span>
+            <span>Paramètres</span>
+          </a>
+        </nav>
+
+        <div className='sidebar-footer'>
+          <button onClick={handleLogout} className='logout-button'>
+            <span className='icon'>🚪</span>
+            <span>Déconnexion</span>
           </button>
+        </div>
+      </aside>
+
+      <main className='main-content'>
+        <div className='customers-page'>
+        {/* Header */}
+        <div className='customers-header'>
+          <h1>Gérer Mes Clients</h1>
+          <div className='header-actions'>
+            <button className='btn-icon' title='Actualiser'>
+              🔄
+            </button>
           <button className='btn-icon' title='Paramètres'>
             ⚙️
           </button>
@@ -245,8 +380,21 @@ const AdminCustomers: React.FC = () => {
                     <span className='info-label'>Téléphone</span>
                     <span className='info-value'>{selectedCustomer.phone}</span>
                   </div>
+                </div>
+
+                {/* Section Notes Éditable */}
+                <div className='notes-section'>
+                  <h3>📝 Notes</h3>
+                  <NotesEditor
+                    customerId={selectedCustomer.id}
+                    initialNotes={selectedCustomer.notes || ''}
+                    onSave={loadCustomers}
+                  />
+                </div>
+
+                <div className='info-grid-hidden' style={{ display: 'none' }}>
                   <div className='info-row'>
-                    <span className='info-label'>Notes</span>
+                    <span className='info-label'>Old Notes Display</span>
                     <span className='info-value'>
                       {selectedCustomer.notes || 'Aucune'}
                     </span>
@@ -364,25 +512,41 @@ const AdminCustomers: React.FC = () => {
               {selectedCustomer.appointments &&
                 selectedCustomer.appointments.length > 0 && (
                   <div className='appointments-section'>
-                    <h3>📅 Historique des RDV</h3>
+                    <h3>📅 Historique des RDV ({selectedCustomer.appointments.length})</h3>
                     <div className='appointments-list-detail'>
-                      {selectedCustomer.appointments.map(apt => (
-                        <div key={apt.id} className='appointment-card'>
-                          <div className='apt-date'>
-                            {new Date(apt.appointmentDate).toLocaleDateString(
-                              'fr-FR'
-                            )}{' '}
-                            à {apt.appointmentTime}
+                      {selectedCustomer.appointments.map(apt => {
+                        const getStatusInfo = (status: string) => {
+                          const statusMap: Record<string, { icon: string; label: string; class: string }> = {
+                            pending: { icon: '⏳', label: 'En attente', class: 'status-pending' },
+                            confirmed: { icon: '✅', label: 'Confirmé', class: 'status-confirmed' },
+                            completed: { icon: '🎉', label: 'Venue effectuée', class: 'status-completed' },
+                            cancelled: { icon: '❌', label: 'Annulé', class: 'status-cancelled' },
+                            no_show: { icon: '🚫', label: 'Absent', class: 'status-no-show' },
+                          };
+                          return statusMap[status] || { icon: '❓', label: status, class: 'status-unknown' };
+                        };
+
+                        const statusInfo = getStatusInfo(apt.status);
+                        
+                        return (
+                          <div key={apt.id} className='appointment-card'>
+                            <div className='apt-date'>
+                              📅 {new Date(apt.appointmentDate).toLocaleDateString('fr-FR', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })} à {apt.appointmentTime}
+                            </div>
+                            <div className='apt-vehicle'>
+                              🚗 {apt.vehicleBrand} {apt.vehicleModel} ({apt.vehicleRegistration})
+                            </div>
+                            <div className={`apt-status ${statusInfo.class}`}>
+                              {statusInfo.icon} {statusInfo.label}
+                            </div>
                           </div>
-                          <div className='apt-vehicle'>
-                            {apt.vehicleBrand} {apt.vehicleModel} (
-                            {apt.vehicleRegistration})
-                          </div>
-                          <div className={`apt-status status-${apt.status}`}>
-                            {apt.status}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -395,6 +559,8 @@ const AdminCustomers: React.FC = () => {
           )}
         </div>
       </div>
+        </div>
+      </main>
     </div>
   );
 };

@@ -1,6 +1,5 @@
 .admin-planning {
   min-height: 100vh;
-  background: #f8fafc;
   padding: 1.5rem;
 }
 
@@ -610,6 +609,11 @@
   color: #991b1b;
 }
 
+.status-badge.no_show {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
 .source-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -700,6 +704,17 @@
   background: #dc2626;
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+}
+
+.btn-no-show {
+  background: #f97316;
+  color: white;
+}
+
+.btn-no-show:hover {
+  background: #ea580c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
 }
 
 @media (max-width: 768px) {

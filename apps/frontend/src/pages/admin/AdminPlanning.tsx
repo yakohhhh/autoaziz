@@ -79,6 +79,13 @@ const AdminPlanning: React.FC = () => {
     return () => clearInterval(interval);
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    navigate('/login');
+  };
+
   const loadAppointments = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
@@ -252,6 +259,7 @@ const AdminPlanning: React.FC = () => {
       confirmed: '✅ Confirmé',
       completed: '🎉 Terminé',
       cancelled: '❌ Annulé',
+      no_show: '🚫 Absent',
     };
     return labels[status] || status;
   };
@@ -293,10 +301,61 @@ const AdminPlanning: React.FC = () => {
   };
 
   return (
-    <div className='admin-planning'>
-      <div className='planning-header'>
-        <div className='header-compact'>
-          <button
+    <div className='admin-dashboard'>
+      <aside className='sidebar'>
+        <div className='sidebar-header'>
+          <h2>AUTOSUR</h2>
+          <p>Admin Panel</p>
+        </div>
+
+        <nav className='sidebar-nav'>
+          <a href='/admin/dashboard' className='nav-item'>
+            <span className='icon'>📊</span>
+            <span>Tableau de bord</span>
+          </a>
+          <a href='/admin/planning' className='nav-item active'>
+            <span className='icon'>📅</span>
+            <span>Planning</span>
+          </a>
+          <a href='/admin/customers' className='nav-item'>
+            <span className='icon'>👥</span>
+            <span>Clients</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>📈</span>
+            <span>Statistiques</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>💰</span>
+            <span>Finances</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>🎁</span>
+            <span>Promotions</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>📧</span>
+            <span>Messages</span>
+          </a>
+          <a href='#' className='nav-item'>
+            <span className='icon'>⚙️</span>
+            <span>Paramètres</span>
+          </a>
+        </nav>
+
+        <div className='sidebar-footer'>
+          <button onClick={handleLogout} className='logout-button'>
+            <span className='icon'>🚪</span>
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </aside>
+
+      <main className='main-content'>
+        <div className='admin-planning'>
+          <div className='planning-header'>
+            <div className='header-compact'>
+              <button
             onClick={() => navigate('/admin/dashboard')}
             className='icon-btn back-btn'
             title='Retour au Dashboard'
@@ -509,6 +568,16 @@ const AdminPlanning: React.FC = () => {
                     className='btn-completed'
                   >
                     🎉 Terminer
+                  </button>
+                )}
+                {selectedEvent.resource.status !== 'no_show' && (
+                  <button
+                    onClick={() =>
+                      updateStatus(selectedEvent.resource.id, 'no_show')
+                    }
+                    className='btn-no-show'
+                  >
+                    ❌ Absent
                   </button>
                 )}
                 {selectedEvent.resource.status !== 'cancelled' && (
@@ -788,6 +857,8 @@ const AdminPlanning: React.FC = () => {
           </div>
         </div>
       )}
+        </div>
+      </main>
     </div>
   );
 };
