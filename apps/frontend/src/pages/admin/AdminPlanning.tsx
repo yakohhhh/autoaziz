@@ -194,7 +194,9 @@ const AdminPlanning: React.FC = () => {
         <div className='day-label'>{label}</div>
         <button
           className='add-appointment-btn'
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             setSelectedDate(date);
             setShowCreateModal(true);
           }}
@@ -237,7 +239,7 @@ const AdminPlanning: React.FC = () => {
             type='date'
             className='date-picker'
             value={format(currentDate, 'yyyy-MM-dd')}
-            onChange={(e) => setCurrentDate(new Date(e.target.value))}
+            onChange={e => setCurrentDate(new Date(e.target.value))}
             title='Choisir une date'
           />
 
@@ -317,7 +319,7 @@ const AdminPlanning: React.FC = () => {
             max={new Date(2024, 0, 1, 20, 0, 0)}
             scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
             date={currentDate}
-            onNavigate={(newDate) => setCurrentDate(newDate)}
+            onNavigate={newDate => setCurrentDate(newDate)}
             components={{
               week: {
                 header: CustomDayHeader,
@@ -458,11 +460,20 @@ const AdminPlanning: React.FC = () => {
 
       {/* Modal de création de RDV */}
       {showCreateModal && selectedDate && (
-        <div className='modal-overlay' onClick={() => setShowCreateModal(false)}>
-          <div className='modal-content create-modal' onClick={e => e.stopPropagation()}>
+        <div
+          className='modal-overlay'
+          onClick={() => setShowCreateModal(false)}
+        >
+          <div
+            className='modal-content create-modal'
+            onClick={e => e.stopPropagation()}
+          >
             <div className='modal-header'>
               <h2>➕ Nouveau Rendez-vous</h2>
-              <button onClick={() => setShowCreateModal(false)} className='close-btn'>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className='close-btn'
+              >
                 ✕
               </button>
             </div>
@@ -471,22 +482,23 @@ const AdminPlanning: React.FC = () => {
               <p className='selected-date-info'>
                 📅 {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
               </p>
-              
+
               <div className='source-selection'>
                 <h3>📞 Source du rendez-vous</h3>
                 <div className='source-buttons'>
-                  <button className='source-btn phone'>
-                    📞 Par téléphone
-                  </button>
-                  <button className='source-btn center'>
-                    🏢 Au centre
-                  </button>
+                  <button className='source-btn phone'>📞 Par téléphone</button>
+                  <button className='source-btn center'>🏢 Au centre</button>
                 </div>
               </div>
 
               <div className='info-text'>
-                <p>Cette fonctionnalité sera complétée prochainement avec le formulaire complet.</p>
-                <p>Pour l'instant, utilisez le système de prise de RDV en ligne.</p>
+                <p>
+                  Cette fonctionnalité sera complétée prochainement avec le
+                  formulaire complet.
+                </p>
+                <p>
+                  Pour l'instant, utilisez le système de prise de RDV en ligne.
+                </p>
               </div>
             </div>
           </div>
