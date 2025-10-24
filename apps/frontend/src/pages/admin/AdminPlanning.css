@@ -56,6 +56,29 @@
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
 }
 
+.date-picker {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #475569;
+}
+
+.date-picker:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.date-picker:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 .filters-compact {
   display: flex;
   gap: 0.5rem;
@@ -200,7 +223,7 @@
 }
 
 .rbc-header {
-  padding: 1rem 0.5rem;
+  padding: 0.75rem 0.5rem 2.5rem 0.5rem;
   font-weight: 700;
   font-size: 13px;
   background: #f8fafc;
@@ -209,6 +232,8 @@
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  position: relative;
+  min-height: 80px;
 }
 
 .rbc-header + .rbc-header {
@@ -703,4 +728,140 @@
   .modal-content {
     padding: 1.5rem;
   }
+}
+
+/* Custom Day Header avec bouton + */
+.custom-day-header {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.25rem 1rem 0.25rem;
+}
+
+.day-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.add-appointment-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  border: 2px solid white;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-top: 0.25rem;
+}
+
+.add-appointment-btn:hover {
+  background: #059669;
+  transform: scale(1.15);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.5);
+}
+
+.add-appointment-btn:active {
+  transform: scale(1.05);
+}
+
+/* Modal de création de RDV */
+.create-modal {
+  max-width: 500px;
+}
+
+.selected-date-info {
+  background: #eff6ff;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #bfdbfe;
+}
+
+.source-selection {
+  margin-bottom: 1.5rem;
+}
+
+.source-selection h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.source-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.source-btn {
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.source-btn.phone {
+  color: #0ea5e9;
+  border-color: #bae6fd;
+}
+
+.source-btn.phone:hover {
+  background: #e0f2fe;
+  border-color: #0ea5e9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(14, 165, 233, 0.2);
+}
+
+.source-btn.center {
+  color: #8b5cf6;
+  border-color: #ddd6fe;
+}
+
+.source-btn.center:hover {
+  background: #ede9fe;
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.2);
+}
+
+.info-text {
+  background: #fef3c7;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #fbbf24;
+}
+
+.info-text p {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.info-text p:first-child {
+  font-weight: 600;
 }

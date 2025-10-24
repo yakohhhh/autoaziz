@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, dateFnsLocalizer, Event } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, getDay, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './AdminPlanning.css';
@@ -13,7 +13,7 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek,
+  startOfWeek: (date: Date) => startOfWeek(date, { weekStartsOn: 1 }), // Commence le lundi
   getDay,
   locales,
 });
@@ -42,6 +42,9 @@ const AdminPlanning: React.FC = () => {
     null
   );
   const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date()); // Date de navigation
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
@@ -184,6 +187,25 @@ const AdminPlanning: React.FC = () => {
     return labels[status] || status;
   };
 
+  // Composant personnalisé pour afficher le header avec bouton +
+  const CustomDayHeader = ({ date, label }: { date: Date; label: string }) => {
+    return (
+      <div className='custom-day-header'>
+        <div className='day-label'>{label}</div>
+        <button
+          className='add-appointment-btn'
+          onClick={() => {
+            setSelectedDate(date);
+            setShowCreateModal(true);
+          }}
+          title='Ajouter un rendez-vous'
+        >
+          +
+        </button>
+      </div>
+    );
+  };
+
   const messages = {
     allDay: 'Toute la journée',
     previous: 'Précédent',
@@ -210,6 +232,14 @@ const AdminPlanning: React.FC = () => {
           >
             ← Dashboard
           </button>
+
+          <input
+            type='date'
+            className='date-picker'
+            value={format(currentDate, 'yyyy-MM-dd')}
+            onChange={(e) => setCurrentDate(new Date(e.target.value))}
+            title='Choisir une date'
+          />
 
           <div className='filters-compact'>
             <button
@@ -286,6 +316,13 @@ const AdminPlanning: React.FC = () => {
             min={new Date(2024, 0, 1, 7, 0, 0)}
             max={new Date(2024, 0, 1, 20, 0, 0)}
             scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
+            date={currentDate}
+            onNavigate={(newDate) => setCurrentDate(newDate)}
+            components={{
+              week: {
+                header: CustomDayHeader,
+              },
+            }}
           />
         </div>
       )}
@@ -413,6 +450,43 @@ const AdminPlanning: React.FC = () => {
                     ❌ Annuler
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de création de RDV */}
+      {showCreateModal && selectedDate && (
+        <div className='modal-overlay' onClick={() => setShowCreateModal(false)}>
+          <div className='modal-content create-modal' onClick={e => e.stopPropagation()}>
+            <div className='modal-header'>
+              <h2>➕ Nouveau Rendez-vous</h2>
+              <button onClick={() => setShowCreateModal(false)} className='close-btn'>
+                ✕
+              </button>
+            </div>
+
+            <div className='modal-body'>
+              <p className='selected-date-info'>
+                📅 {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
+              </p>
+              
+              <div className='source-selection'>
+                <h3>📞 Source du rendez-vous</h3>
+                <div className='source-buttons'>
+                  <button className='source-btn phone'>
+                    📞 Par téléphone
+                  </button>
+                  <button className='source-btn center'>
+                    🏢 Au centre
+                  </button>
+                </div>
+              </div>
+
+              <div className='info-text'>
+                <p>Cette fonctionnalité sera complétée prochainement avec le formulaire complet.</p>
+                <p>Pour l'instant, utilisez le système de prise de RDV en ligne.</p>
               </div>
             </div>
           </div>
