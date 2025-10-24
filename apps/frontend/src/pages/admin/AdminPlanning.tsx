@@ -202,79 +202,66 @@ const AdminPlanning: React.FC = () => {
   return (
     <div className='admin-planning'>
       <div className='planning-header'>
-        <div className='header-top'>
+        <div className='header-compact'>
           <button
             onClick={() => navigate('/admin/dashboard')}
-            className='back-btn'
+            className='icon-btn back-btn'
+            title='Retour au Dashboard'
           >
-            ← Retour au Dashboard
+            ← Dashboard
           </button>
-          <h1>📅 Planning des Rendez-vous</h1>
+
+          <div className='filters-compact'>
+            <button
+              className={filter === 'all' ? 'active' : ''}
+              onClick={() => setFilter('all')}
+              title='Tous les rendez-vous'
+            >
+              Tous ({events.length})
+            </button>
+            <button
+              className={filter === 'pending' ? 'active pending' : 'pending'}
+              onClick={() => setFilter('pending')}
+              title='En attente'
+            >
+              ⏳ {events.filter(e => e.resource.status === 'pending').length}
+            </button>
+            <button
+              className={
+                filter === 'confirmed' ? 'active confirmed' : 'confirmed'
+              }
+              onClick={() => setFilter('confirmed')}
+              title='Confirmés'
+            >
+              ✅ {events.filter(e => e.resource.status === 'confirmed').length}
+            </button>
+            <button
+              className={
+                filter === 'completed' ? 'active completed' : 'completed'
+              }
+              onClick={() => setFilter('completed')}
+              title='Complétés'
+            >
+              🎉 {events.filter(e => e.resource.status === 'completed').length}
+            </button>
+            <button
+              className={
+                filter === 'cancelled' ? 'active cancelled' : 'cancelled'
+              }
+              onClick={() => setFilter('cancelled')}
+              title='Annulés'
+            >
+              ❌ {events.filter(e => e.resource.status === 'cancelled').length}
+            </button>
+          </div>
+
           <button
             onClick={() => loadAppointments(false)}
-            className='refresh-btn'
+            className='icon-btn refresh-btn'
+            title='Actualiser le planning'
           >
-            🔄 Actualiser
+            🔄
           </button>
-        </div>
-
-        <div className='filters'>
-          <button
-            className={filter === 'all' ? 'active' : ''}
-            onClick={() => setFilter('all')}
-          >
-            Tous ({events.length})
-          </button>
-          <button
-            className={filter === 'pending' ? 'active pending' : 'pending'}
-            onClick={() => setFilter('pending')}
-          >
-            ⏳ En attente (
-            {events.filter(e => e.resource.status === 'pending').length})
-          </button>
-          <button
-            className={
-              filter === 'confirmed' ? 'active confirmed' : 'confirmed'
-            }
-            onClick={() => setFilter('confirmed')}
-          >
-            ✅ Confirmés (
-            {events.filter(e => e.resource.status === 'confirmed').length})
-          </button>
-          <button
-            className={
-              filter === 'completed' ? 'active completed' : 'completed'
-            }
-            onClick={() => setFilter('completed')}
-          >
-            🎉 Complétés (
-            {events.filter(e => e.resource.status === 'completed').length})
-          </button>
-          <button
-            className={
-              filter === 'cancelled' ? 'active cancelled' : 'cancelled'
-            }
-            onClick={() => setFilter('cancelled')}
-          >
-            Annulés (
-            {events.filter(e => e.resource.status === 'cancelled').length})
-          </button>
-        </div>
-
-        <div className='legend'>
-          <div className='legend-title'>Légende :</div>
-          <div className='legend-item'>
-            <span className='legend-color manual'></span>
-            <span>🟢 RDV Manuel (Admin)</span>
-          </div>
-          <div className='legend-item'>
-            <span className='legend-color online'></span>
-            <span>🌐 RDV En Ligne (Client)</span>
-          </div>
-          <div className='legend-item'>
-            <span className='legend-color cancelled'></span>
-            <span>❌ Annulé</span>
-          </div>
         </div>
       </div>
 
@@ -287,7 +274,7 @@ const AdminPlanning: React.FC = () => {
             events={filteredEvents}
             startAccessor='start'
             endAccessor='end'
-            style={{ height: 800 }}
+            style={{ height: '100%' }}
             onSelectEvent={handleSelectEvent}
             eventPropGetter={getEventStyle}
             messages={messages}

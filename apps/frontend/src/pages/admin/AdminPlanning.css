@@ -6,76 +6,67 @@
 
 .planning-header {
   background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
 
-.header-top {
+.header-compact {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
-.header-top h1 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1.875rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-
-.back-btn,
-.refresh-btn {
-  padding: 0.625rem 1.25rem;
+.icon-btn {
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9375rem;
+  border-radius: 8px;
+  font-size: 1.25rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.back-btn {
   background: #f1f5f9;
   color: #475569;
   border: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
-.back-btn:hover {
+.icon-btn:hover {
   background: #e2e8f0;
   border-color: #cbd5e1;
   transform: translateY(-1px);
+}
+
+.back-btn {
+  font-size: 0.875rem;
 }
 
 .refresh-btn {
   background: #3b82f6;
   color: white;
   box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
 }
 
 .refresh-btn:hover {
   background: #2563eb;
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
 }
 
-.filters {
+.filters-compact {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
 }
 
-.filters button {
-  padding: 0.625rem 1rem;
+.filters-compact button {
+  padding: 0.5rem 0.875rem;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -84,113 +75,80 @@
   color: #64748b;
 }
 
-.filters button:hover {
+.filters-compact button:hover {
   border-color: #cbd5e1;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.filters button.active {
+.filters-compact button.active {
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.filters button.pending {
+.filters-compact button.pending {
   color: #d97706;
   border-color: #fed7aa;
 }
 
-.filters button.pending.active {
-  background: #f59e0b;
-  color: white;
-  border-color: #f59e0b;
+.filters-compact button.pending.active {
+  background: #fef3c7;
+  border-color: #fbbf24;
 }
 
-.filters button.confirmed {
+.filters-compact button.confirmed {
   color: #059669;
   border-color: #a7f3d0;
 }
 
-.filters button.confirmed.active {
-  background: #10b981;
-  color: white;
+.filters-compact button.confirmed.active {
+  background: #d1fae5;
   border-color: #10b981;
 }
 
-.filters button.completed {
-  color: #4f46e5;
-  border-color: #c7d2fe;
+.filters-compact button.completed {
+  color: #7c3aed;
+  border-color: #ddd6fe;
 }
 
-.filters button.completed.active {
-  background: #6366f1;
-  color: white;
-  border-color: #6366f1;
+.filters-compact button.completed.active {
+  background: #ede9fe;
+  border-color: #a78bfa;
 }
 
-.filters button.cancelled {
+.filters-compact button.cancelled {
   color: #dc2626;
   border-color: #fecaca;
 }
 
-.filters button.cancelled.active {
-  background: #ef4444;
-  color: white;
+.filters-compact button.cancelled.active {
+  background: #fee2e2;
   border-color: #ef4444;
 }
 
-.legend {
+.legend-compact {
   display: flex;
+  gap: 0.75rem;
   align-items: center;
-  gap: 1.5rem;
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
 }
 
-.legend-title {
-  font-weight: 700;
-  color: #0f172a;
-  font-size: 0.875rem;
+.legend-compact span {
+  font-size: 1.25rem;
+  cursor: help;
+  transition: transform 0.2s ease;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #475569;
-}
-
-.legend-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.legend-color.manual {
-  background: #10b981;
-}
-
-.legend-color.online {
-  background: #fbbf24;
-}
-
-.legend-color.cancelled {
-  background: #ef4444;
+.legend-compact span:hover {
+  transform: scale(1.2);
 }
 
 .loading {
   text-align: center;
-  padding: 4rem;
-  font-size: 1.25rem;
+  padding: 3rem;
+  font-size: 1.125rem;
   color: #64748b;
   background: white;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
 }
 
 .calendar-container {
@@ -199,15 +157,36 @@
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
-  height: 850px;
-  overflow: hidden;
+  height: calc(100vh - 140px);
+  min-height: 600px;
+  overflow: auto;
   position: relative;
+  scroll-behavior: smooth;
+}
+
+.calendar-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Override react-big-calendar styles */
 .rbc-calendar {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  height: 800px;
+  height: 100%;
   font-size: 14px;
   overflow: hidden;
 }
@@ -250,7 +229,7 @@
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
-  min-height: 115px;
+  min-height: 95px;
   overflow: visible;
   border-left: 4px solid transparent;
   border-radius: 6px;
@@ -298,14 +277,14 @@
 
 /* CRÉNEAUX HORAIRES OPTIMISÉS - 15 minutes avec labels */
 .rbc-time-slot {
-  min-height: 60px !important;
-  height: 60px !important;
+  min-height: 50px !important;
+  height: 50px !important;
   border-top: 1px solid #e2e8f0;
 }
 
 .rbc-timeslot-group {
-  min-height: 60px !important;
-  height: 60px !important;
+  min-height: 50px !important;
+  height: 50px !important;
   border-bottom: none;
 }
 
@@ -320,14 +299,14 @@
 
 /* Labels d'horaire toutes les 15 minutes */
 .rbc-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #64748b;
   padding: 0 8px;
 }
 
 .rbc-day-slot .rbc-event {
-  min-height: 115px;
+  min-height: 95px;
   overflow: hidden;
   width: calc(100% - 2px);
   left: 1px !important;
@@ -365,8 +344,9 @@
 
 /* Amélioration de la vue hebdomadaire */
 .rbc-time-content {
-  overflow-y: auto;
-  height: 720px;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  height: auto;
   border-top: 2px solid #e5e7eb;
 }
 
