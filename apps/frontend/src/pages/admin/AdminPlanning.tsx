@@ -48,6 +48,24 @@ const AdminPlanning: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
+  // États du formulaire de création
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    licensePlate: '',
+    vehicleType: '',
+    vehicleBrand: '',
+    vehicleModel: '',
+    fuelType: '',
+    appointmentDate: '',
+    source: '',
+    notes: '',
+  });
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -126,6 +144,57 @@ const AdminPlanning: React.FC = () => {
     }
   };
 
+  const handleCreateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError('');
+    setFormLoading(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        'http://localhost:3001/admin/calendar/appointments/manual',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la création');
+      }
+
+      // Réinitialiser le formulaire
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        licensePlate: '',
+        vehicleType: '',
+        vehicleBrand: '',
+        vehicleModel: '',
+        fuelType: '',
+        appointmentDate: '',
+        source: '',
+        notes: '',
+      });
+
+      setShowCreateModal(false);
+      loadAppointments(false);
+      alert('✅ Rendez-vous créé avec succès !');
+    } catch (error: any) {
+      setFormError(error.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const handleSelectEvent = (event: AppointmentEvent) => {
     setSelectedEvent(event);
     setShowModal(true);
@@ -194,7 +263,7 @@ const AdminPlanning: React.FC = () => {
         <div className='day-label'>{label}</div>
         <button
           className='add-appointment-btn'
-          onClick={(e) => {
+          onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             setSelectedDate(date);
@@ -462,7 +531,10 @@ const AdminPlanning: React.FC = () => {
       {showCreateModal && selectedDate && (
         <div
           className='modal-overlay'
-          onClick={() => setShowCreateModal(false)}
+          onClick={() => {
+            setShowCreateModal(false);
+            setFormError('');
+          }}
         >
           <div
             className='modal-content create-modal'
@@ -471,36 +543,248 @@ const AdminPlanning: React.FC = () => {
             <div className='modal-header'>
               <h2>➕ Nouveau Rendez-vous</h2>
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setFormError('');
+                }}
                 className='close-btn'
               >
                 ✕
               </button>
             </div>
 
-            <div className='modal-body'>
+            <form onSubmit={handleCreateAppointment} className='modal-body'>
               <p className='selected-date-info'>
                 📅 {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
               </p>
 
+              {formError && (
+                <div className='error-message'>❌ {formError}</div>
+              )}
+
               <div className='source-selection'>
-                <h3>📞 Source du rendez-vous</h3>
+                <h3>📞 Source du rendez-vous *</h3>
                 <div className='source-buttons'>
-                  <button className='source-btn phone'>📞 Par téléphone</button>
-                  <button className='source-btn center'>🏢 Au centre</button>
+                  <button
+                    type='button'
+                    className={`source-btn phone ${formData.source === 'phone' ? 'active' : ''}`}
+                    onClick={() =>
+                      setFormData({ ...formData, source: 'phone' })
+                    }
+                  >
+                    📞 Par téléphone
+                  </button>
+                  <button
+                    type='button'
+                    className={`source-btn center ${formData.source === 'center' ? 'active' : ''}`}
+                    onClick={() =>
+                      setFormData({ ...formData, source: 'center' })
+                    }
+                  >
+                    🏢 Au centre
+                  </button>
                 </div>
               </div>
 
-              <div className='info-text'>
-                <p>
-                  Cette fonctionnalité sera complétée prochainement avec le
-                  formulaire complet.
-                </p>
-                <p>
-                  Pour l'instant, utilisez le système de prise de RDV en ligne.
-                </p>
+              <div className='form-section'>
+                <h3>👤 Informations client</h3>
+                <div className='form-row'>
+                  <div className='form-group'>
+                    <label>Prénom *</label>
+                    <input
+                      type='text'
+                      value={formData.firstName}
+                      onChange={e =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                      required
+                      placeholder='Jean'
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <label>Nom *</label>
+                    <input
+                      type='text'
+                      value={formData.lastName}
+                      onChange={e =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                      required
+                      placeholder='Dupont'
+                    />
+                  </div>
+                </div>
+
+                <div className='form-row'>
+                  <div className='form-group'>
+                    <label>Email *</label>
+                    <input
+                      type='email'
+                      value={formData.email}
+                      onChange={e =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      required
+                      placeholder='jean.dupont@email.com'
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <label>Téléphone *</label>
+                    <input
+                      type='tel'
+                      value={formData.phone}
+                      onChange={e =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      required
+                      placeholder='06 12 34 56 78'
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <div className='form-section'>
+                <h3>🚗 Véhicule</h3>
+                <div className='form-group'>
+                  <label>Type de véhicule *</label>
+                  <select
+                    value={formData.vehicleType}
+                    onChange={e =>
+                      setFormData({ ...formData, vehicleType: e.target.value })
+                    }
+                    required
+                  >
+                    <option value=''>Sélectionnez un type</option>
+                    <option value='Voiture'>Voiture</option>
+                    <option value='Moto'>Moto</option>
+                    <option value='Quad'>Quad</option>
+                    <option value='Scooter'>Scooter</option>
+                    <option value='Utilitaire léger'>Utilitaire léger</option>
+                  </select>
+                </div>
+
+                <div className='form-row'>
+                  <div className='form-group'>
+                    <label>Marque *</label>
+                    <input
+                      type='text'
+                      value={formData.vehicleBrand}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          vehicleBrand: e.target.value,
+                        })
+                      }
+                      required
+                      placeholder='Peugeot'
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <label>Modèle *</label>
+                    <input
+                      type='text'
+                      value={formData.vehicleModel}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          vehicleModel: e.target.value,
+                        })
+                      }
+                      required
+                      placeholder='208'
+                    />
+                  </div>
+                </div>
+
+                <div className='form-row'>
+                  <div className='form-group'>
+                    <label>Immatriculation *</label>
+                    <input
+                      type='text'
+                      value={formData.licensePlate}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          licensePlate: e.target.value,
+                        })
+                      }
+                      required
+                      placeholder='AB-123-CD'
+                    />
+                  </div>
+                  <div className='form-group'>
+                    <label>Type de carburant *</label>
+                    <select
+                      value={formData.fuelType}
+                      onChange={e =>
+                        setFormData({ ...formData, fuelType: e.target.value })
+                      }
+                      required
+                    >
+                      <option value=''>Sélectionnez</option>
+                      <option value='Essence'>Essence</option>
+                      <option value='Diesel'>Diesel</option>
+                      <option value='Hybride'>Hybride</option>
+                      <option value='Électrique'>Électrique</option>
+                      <option value='GPL'>GPL</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className='form-section'>
+                <h3>📅 Date et heure *</h3>
+                <div className='form-group'>
+                  <input
+                    type='datetime-local'
+                    value={formData.appointmentDate}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        appointmentDate: e.target.value,
+                      })
+                    }
+                    required
+                    min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                  />
+                </div>
+              </div>
+
+              <div className='form-section'>
+                <h3>📝 Notes (optionnel)</h3>
+                <div className='form-group'>
+                  <textarea
+                    value={formData.notes}
+                    onChange={e =>
+                      setFormData({ ...formData, notes: e.target.value })
+                    }
+                    placeholder='Informations supplémentaires...'
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className='modal-actions'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setFormError('');
+                  }}
+                  className='btn-secondary'
+                  disabled={formLoading}
+                >
+                  Annuler
+                </button>
+                <button
+                  type='submit'
+                  className='btn-primary'
+                  disabled={formLoading || !formData.source}
+                >
+                  {formLoading ? '⏳ Création...' : '✅ Créer le RDV'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

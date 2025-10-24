@@ -1,5 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaClient } from '../../generated/prisma';
+import {
+  CreateManualAppointmentDto,
+  ManualAppointmentSource,
+} from '../dto/create-manual-appointment.dto';
 
 @Injectable()
 export class CalendarService {
@@ -140,6 +148,115 @@ export class CalendarService {
         time: slot,
         available: !bookedSlots.includes(slot),
       })),
+    };
+  }
+
+  async createManualAppointment(dto: CreateManualAppointmentDto) {
+    const appointmentDateTime = new Date(dto.appointmentDate);
+    const appointmentDate = new Date(appointmentDateTime.toDateString());
+    const appointmentTime = appointmentDateTime.toTimeString().slice(0, 5);
+
+    // Vérifier si le créneau est déjà pris
+    const existingAppointment = await this.prisma.appointment.findFirst({
+      where: {
+        appointmentDate,
+        appointmentTime,
+        status: { notIn: ['cancelled'] },
+      },
+    });
+
+    if (existingAppointment) {
+      throw new BadRequestException(
+        `Le créneau ${appointmentTime} du ${appointmentDate.toLocaleDateString('fr-FR')} est déjà réservé`
+      );
+    }
+
+    // Chercher ou créer le client
+    let customer = await this.prisma.customer.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!customer) {
+      customer = await this.prisma.customer.create({
+        data: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          email: dto.email,
+          phone: dto.phone,
+        },
+      });
+    }
+
+    // Chercher ou créer le véhicule
+    let vehicle = await this.prisma.vehicle.findFirst({
+      where: {
+        customerId: customer.id,
+        licensePlate: dto.licensePlate,
+      },
+    });
+
+    if (!vehicle) {
+      vehicle = await this.prisma.vehicle.create({
+        data: {
+          customerId: customer.id,
+          licensePlate: dto.licensePlate,
+          vehicleType: dto.vehicleType,
+          vehicleBrand: dto.vehicleBrand,
+          vehicleModel: dto.vehicleModel,
+          fuelType: dto.fuelType,
+        },
+      });
+    }
+
+    // Créer la note avec le tag [MANUEL] et la source
+    const sourceLabel =
+      dto.source === ManualAppointmentSource.PHONE ? 'Téléphone' : 'Au Centre';
+    const notes = `[MANUEL] Pris par ${sourceLabel}${dto.notes ? ' - ' + dto.notes : ''}`;
+
+    // Créer le rendez-vous avec toutes les informations du véhicule
+    const appointment = await this.prisma.appointment.create({
+      data: {
+        customerId: customer.id,
+        vehicleId: vehicle.id,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        email: dto.email,
+        phone: dto.phone,
+        vehicleRegistration: dto.licensePlate,
+        vehicleType: dto.vehicleType,
+        vehicleBrand: dto.vehicleBrand,
+        vehicleModel: dto.vehicleModel,
+        fuelType: dto.fuelType,
+        appointmentDate,
+        appointmentTime,
+        status: 'confirmed', // RDV manuel = confirmé directement
+        emailVerified: true, // Pris manuellement donc vérifié
+        phoneVerified: true,
+        source: dto.source,
+        notes,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Rendez-vous créé avec succès',
+      appointment: {
+        id: appointment.id,
+        customerId: customer.id,
+        vehicleId: vehicle.id,
+        firstName: appointment.firstName,
+        lastName: appointment.lastName,
+        email: appointment.email,
+        phone: appointment.phone,
+        vehicleType: appointment.vehicleType,
+        vehicleBrand: appointment.vehicleBrand,
+        vehicleModel: appointment.vehicleModel,
+        vehicleRegistration: appointment.vehicleRegistration,
+        fuelType: appointment.fuelType,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        source: dto.source,
+      },
     };
   }
 

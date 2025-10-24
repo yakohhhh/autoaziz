@@ -21,8 +21,53 @@ model Contact {
   @@map("contacts")
 }
 
+model Customer {
+  id                    Int           @id @default(autoincrement())
+  firstName             String
+  lastName              String
+  email                 String        @unique
+  phone                 String
+  notes                 String?       @db.Text
+  // Statistiques
+  totalVisits           Int           @default(0)
+  totalCancellations    Int           @default(0)
+  totalNoShows          Int           @default(0)
+  totalSpent            Float         @default(0)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  
+  vehicles              Vehicle[]
+  appointments          Appointment[]
+
+  @@map("customers")
+  @@index([email])
+  @@index([phone])
+}
+
+model Vehicle {
+  id                  Int           @id @default(autoincrement())
+  customerId          Int
+  licensePlate        String
+  vehicleType         String
+  vehicleBrand        String
+  vehicleModel        String
+  fuelType            String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  
+  customer            Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  appointments        Appointment[]
+
+  @@map("vehicles")
+  @@unique([customerId, licensePlate])
+  @@index([licensePlate])
+}
+
 model Appointment {
   id                       Int       @id @default(autoincrement())
+  customerId               Int?
+  vehicleId                Int?
+  // Données dupliquées pour les RDV sans compte client
   firstName                String
   lastName                 String
   email                    String
@@ -40,10 +85,19 @@ model Appointment {
   phoneVerified            Boolean?
   verificationCodeExpiry   DateTime?
   notes                    String?   @db.Text
+  price                    Float?
+  actualStatus             String?   // 'completed', 'no_show', 'cancelled'
+  source                   String?   // 'online', 'phone', 'center'
   createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @default(now()) @updatedAt
+  
+  customer                 Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  vehicle                  Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
 
   @@map("appointments")
   @@index([email])
   @@index([appointmentDate])
   @@index([status])
+  @@index([customerId])
+  @@index([vehicleId])
 }

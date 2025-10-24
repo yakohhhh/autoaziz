@@ -1,0 +1,647 @@
+/* Page Clients - Style AutoSur */
+.customers-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.customers-header {
+  background: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #eff6ff;
+}
+
+.customers-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-icon {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
+}
+
+/* Container principal */
+.customers-container {
+  display: flex;
+  height: calc(100vh - 73px);
+}
+
+/* Panneau liste gauche */
+.customers-list-panel {
+  flex: 1;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barre de recherche */
+.search-bar {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+}
+
+.search-button:hover {
+  background: #2563eb;
+}
+
+/* Filtres alphabétiques */
+.alphabet-filter {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  background: #f9fafb;
+}
+
+.filter-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.filter-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* En-têtes colonnes */
+.list-header {
+  display: grid;
+  grid-template-columns: 50px 1fr 1.2fr 0.8fr 50px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+/* Liste des clients */
+.customers-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.customer-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 1.2fr 0.8fr 50px;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: all 0.15s;
+  align-items: center;
+}
+
+.customer-row:hover {
+  background: #f9fafb;
+}
+
+.customer-row.selected {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.col-avatar {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.col-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.col-email {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.col-phone {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.col-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.loading-state,
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+/* Panneau détails droite */
+.customer-details-panel {
+  width: 0;
+  overflow: hidden;
+  background: white;
+  transition: width 0.3s ease;
+  border-left: 1px solid #e5e7eb;
+}
+
+.customer-details-panel.visible {
+  width: 450px;
+}
+
+.customer-details-panel > * {
+  width: 450px;
+}
+
+/* En-tête profil */
+.profile-header {
+  position: relative;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-avatar-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: white;
+  color: #667eea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.close-details {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-details:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Informations profil */
+.profile-info {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-info h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+  text-align: center;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #e5e7eb;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Sections dropdowns */
+.details-sections {
+  max-height: 300px;
+  overflow-y: auto;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.section {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.section-header,
+summary.section-header {
+  padding: 1rem 1.5rem;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s;
+  list-style: none;
+}
+
+.section-header:hover,
+summary.section-header:hover {
+  background: #f9fafb;
+}
+
+.section summary::marker {
+  display: none;
+}
+
+.section-content {
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.history-item {
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+}
+
+/* Stats détaillées */
+.stats-section {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.stats-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.stat-card {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  color: white;
+}
+
+.stat-card.green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-card.red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.stat-card.yellow {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Véhicules */
+.vehicles-section {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vehicles-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.vehicles-list-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vehicle-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.vehicle-plate {
+  background: #1e40af;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+}
+
+.vehicle-details {
+  flex: 1;
+}
+
+.vehicle-details strong {
+  color: #1f2937;
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.vehicle-meta {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Historique RDV */
+.appointments-section {
+  padding: 1.5rem;
+}
+
+.appointments-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.appointments-list-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.appointment-card {
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+}
+
+.apt-date {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.apt-vehicle {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.apt-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.apt-status.status-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.apt-status.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.apt-status.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Pas de sélection */
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+}
+
+.no-selection-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-selection p {
+  font-size: 1.1rem;
+}
+
+/* Scrollbar personnalisée */
+.customers-list::-webkit-scrollbar,
+.details-sections::-webkit-scrollbar,
+.appointments-list-detail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.customers-list::-webkit-scrollbar-track,
+.details-sections::-webkit-scrollbar-track,
+.appointments-list-detail::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.customers-list::-webkit-scrollbar-thumb,
+.details-sections::-webkit-scrollbar-thumb,
+.appointments-list-detail::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.customers-list::-webkit-scrollbar-thumb:hover,
+.details-sections::-webkit-scrollbar-thumb:hover,
+.appointments-list-detail::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

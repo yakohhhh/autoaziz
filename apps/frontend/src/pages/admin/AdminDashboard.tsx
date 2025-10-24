@@ -138,7 +138,7 @@ const AdminDashboard: React.FC = () => {
             <span className='icon'>📅</span>
             <span>Planning</span>
           </a>
-          <a href='#' className='nav-item'>
+          <a href='/admin/customers' className='nav-item'>
             <span className='icon'>👥</span>
             <span>Clients</span>
           </a>

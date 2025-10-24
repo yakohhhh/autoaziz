@@ -1,5 +1,14 @@
-import { Controller, Get, Patch, Param, Body, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Param,
+  Body,
+  Query,
+} from '@nestjs/common';
 import { CalendarService } from './calendar.service';
+import { CreateManualAppointmentDto } from '../dto/create-manual-appointment.dto';
 
 @Controller('admin/calendar')
 export class CalendarController {
@@ -25,5 +34,10 @@ export class CalendarController {
   @Get('slots/availability')
   async getSlotAvailability(@Query('date') date: string) {
     return this.calendarService.getSlotAvailability(date);
+  }
+
+  @Post('appointments/manual')
+  async createManualAppointment(@Body() dto: CreateManualAppointmentDto) {
+    return this.calendarService.createManualAppointment(dto);
   }
 }

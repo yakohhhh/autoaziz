@@ -10,6 +10,7 @@ import {
   Login,
   AdminDashboard,
   AdminPlanning,
+  AdminCustomers,
 } from './pages';
 import './App.css';
 
@@ -87,6 +88,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminPlanning />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin/customers'
+            element={
+              <ProtectedRoute>
+                <AdminCustomers />
               </ProtectedRoute>
             }
           />
