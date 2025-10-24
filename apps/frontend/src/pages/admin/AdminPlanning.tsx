@@ -295,7 +295,7 @@ const AdminPlanning: React.FC = () => {
             defaultView='week'
             views={['week', 'day', 'agenda']}
             step={15}
-            timeslots={4}
+            timeslots={1}
             min={new Date(2024, 0, 1, 7, 0, 0)}
             max={new Date(2024, 0, 1, 20, 0, 0)}
             scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
