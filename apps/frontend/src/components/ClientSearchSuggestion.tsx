@@ -48,8 +48,9 @@ const ClientSearchSuggestion: React.FC<ClientSearchSuggestionProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<ClientSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedClient, setSelectedClient] =
-    useState<ClientSuggestion | null>(null);
+  const [selectedClient, setSelectedClient] = useState<ClientSuggestion | null>(
+    null
+  );
 
   useEffect(() => {
     const searchClients = async () => {
@@ -60,8 +61,10 @@ const ClientSearchSuggestion: React.FC<ClientSearchSuggestionProps> = ({
 
       // Attendre au moins 2 caractères
       if (
-        (firstName && firstName.length < 2) &&
-        (lastName && lastName.length < 2)
+        firstName &&
+        firstName.length < 2 &&
+        lastName &&
+        lastName.length < 2
       ) {
         setSuggestions([]);
         return;
@@ -183,12 +186,8 @@ const ClientSearchSuggestion: React.FC<ClientSearchSuggestionProps> = ({
                   </div>
                   <div className='suggestion-details'>
                     <span>📱 {client.phone}</span>
-                    <span>
-                      📅 {client.totalAppointments} RDV
-                    </span>
-                    <span>
-                      🚗 {client.vehicles.length} véhicule(s)
-                    </span>
+                    <span>📅 {client.totalAppointments} RDV</span>
+                    <span>🚗 {client.vehicles.length} véhicule(s)</span>
                   </div>
                   {client.vehicles.length > 0 && (
                     <div className='suggestion-vehicles'>

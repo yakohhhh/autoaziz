@@ -261,11 +261,11 @@ const AddVehicleModal: React.FC<{
         onSave();
         onClose();
       } else {
-        alert('❌ Erreur lors de l\'ajout');
+        alert("❌ Erreur lors de l'ajout");
       }
     } catch (error) {
       console.error('Erreur:', error);
-      alert('❌ Erreur lors de l\'ajout');
+      alert("❌ Erreur lors de l'ajout");
     } finally {
       setSaving(false);
     }
@@ -282,7 +282,10 @@ const AddVehicleModal: React.FC<{
               type='text'
               value={formData.licensePlate}
               onChange={e =>
-                setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })
+                setFormData({
+                  ...formData,
+                  licensePlate: e.target.value.toUpperCase(),
+                })
               }
               placeholder='AB-123-CD'
               required
@@ -425,7 +428,10 @@ const EditVehicleModal: React.FC<{
               type='text'
               value={formData.licensePlate}
               onChange={e =>
-                setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })
+                setFormData({
+                  ...formData,
+                  licensePlate: e.target.value.toUpperCase(),
+                })
               }
               required
             />
@@ -559,14 +565,14 @@ const AdminCustomers: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<number | null>(null);
-  
+
   // États pour les nouveaux modals
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
   const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
-  
+
   const [newCustomer, setNewCustomer] = useState({
     firstName: '',
     lastName: '',
@@ -703,7 +709,7 @@ const AdminCustomers: React.FC = () => {
 
   const handleDeleteVehicle = async (vehicleId: number) => {
     if (!selectedCustomer) return;
-    
+
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
@@ -1134,7 +1140,14 @@ const AdminCustomers: React.FC = () => {
 
                   {/* Véhicules */}
                   <div className='vehicles-section'>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '1rem',
+                      }}
+                    >
                       <h3>
                         🚗 Véhicules ({selectedCustomer.vehicles?.length || 0})
                       </h3>
@@ -1247,7 +1260,13 @@ const AdminCustomers: React.FC = () => {
                                   </div>
                                 )}
                               </div>
-                              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  gap: '0.5rem',
+                                  marginTop: '0.75rem',
+                                }}
+                              >
                                 <button
                                   onClick={() => {
                                     setVehicleToEdit(vehicle);
@@ -1268,7 +1287,11 @@ const AdminCustomers: React.FC = () => {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le véhicule ${vehicle.licensePlate} ?`)) {
+                                    if (
+                                      window.confirm(
+                                        `Êtes-vous sûr de vouloir supprimer le véhicule ${vehicle.licensePlate} ?`
+                                      )
+                                    ) {
                                       handleDeleteVehicle(vehicle.id);
                                     }
                                   }}
