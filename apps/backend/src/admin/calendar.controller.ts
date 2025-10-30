@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Post,
+  Delete,
   Param,
   Body,
   Query,
@@ -29,6 +30,21 @@ export class CalendarController {
     @Body('status') status: string
   ) {
     return this.calendarService.updateAppointmentStatus(parseInt(id), status);
+  }
+
+  @Delete('appointments/:id')
+  async deleteAppointment(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Body('note') note?: string,
+    @Body('deletedBy') deletedBy?: string
+  ) {
+    return this.calendarService.deleteAppointment(
+      parseInt(id),
+      reason,
+      note,
+      deletedBy
+    );
   }
 
   @Get('slots/availability')

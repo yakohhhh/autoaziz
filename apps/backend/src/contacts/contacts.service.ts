@@ -1,40 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Contact } from '../entities/contact.entity';
 import { CreateContactDto } from '../dto/create-contact.dto';
 import { EmailService } from '../email/email.service';
+import { PrismaClient } from '../../generated/prisma';
 
 @Injectable()
 export class ContactsService {
-  constructor(
-    @InjectRepository(Contact)
-    private contactRepository: Repository<Contact>,
-    private emailService: EmailService
-  ) {}
+  private prisma: PrismaClient;
 
-  async create(createContactDto: CreateContactDto): Promise<Contact> {
-    const contact = this.contactRepository.create(createContactDto);
-    const savedContact = await this.contactRepository.save(contact);
+  constructor(private emailService: EmailService) {
+    this.prisma = new PrismaClient();
+  }
+
+  async create(createContactDto: CreateContactDto) {
+    const contact = await this.prisma.contact.create({
+      data: {
+        name: createContactDto.name,
+        email: createContactDto.email,
+        message: createContactDto.message,
+      },
+    });
+
     await this.emailService.sendContactConfirmation(
       createContactDto.email,
       createContactDto.name
     );
+
     await this.emailService.notifyAdminNewContact(
       createContactDto.name,
       createContactDto.email,
       createContactDto.message
     );
-    return savedContact;
+
+    return contact;
   }
 
-  async findAll(): Promise<Contact[]> {
-    return this.contactRepository.find({
-      order: { createdAt: 'DESC' },
+  async findAll() {
+    return this.prisma.contact.findMany({
+      orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: number): Promise<Contact | null> {
-    return this.contactRepository.findOne({ where: { id } });
+  async findOne(id: number) {
+    return this.prisma.contact.findUnique({ where: { id } });
   }
 }

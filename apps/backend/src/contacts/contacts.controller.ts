@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from '../dto/create-contact.dto';
-import { Contact } from '../entities/contact.entity';
 
 @ApiTags('contacts')
 @Controller('contacts')
@@ -14,9 +13,8 @@ export class ContactsController {
   @ApiResponse({
     status: 201,
     description: 'Contact created successfully',
-    type: Contact,
   })
-  create(@Body() createContactDto: CreateContactDto): Promise<Contact> {
+  create(@Body() createContactDto: CreateContactDto) {
     return this.contactsService.create(createContactDto);
   }
 
@@ -25,16 +23,15 @@ export class ContactsController {
   @ApiResponse({
     status: 200,
     description: 'List of all contacts',
-    type: [Contact],
   })
-  findAll(): Promise<Contact[]> {
+  findAll() {
     return this.contactsService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a contact message by id' })
-  @ApiResponse({ status: 200, description: 'Contact details', type: Contact })
-  findOne(@Param('id') id: string): Promise<Contact | null> {
+  @ApiResponse({ status: 200, description: 'Contact details' })
+  findOne(@Param('id') id: string) {
     return this.contactsService.findOne(+id);
   }
 }

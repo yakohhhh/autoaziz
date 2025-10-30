@@ -22,7 +22,7 @@
     ],
     
     // 🔧 General Rules
-    "no-console": "warn",
+    "no-console": "off",
     "no-debugger": "error",
     "no-duplicate-imports": "error",
     "prefer-const": "error",
@@ -31,7 +31,10 @@
     // ⚛️ React Rules
     "react-hooks/exhaustive-deps": "warn",
     "react/jsx-key": "error",
-    "react/jsx-no-duplicate-props": "error"
+    "react/jsx-no-duplicate-props": "error",
+    
+    // ♿ Accessibility Rules
+    "jsx-a11y/anchor-is-valid": "off"
   },
   "env": {
     "browser": true,

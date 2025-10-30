@@ -12,7 +12,6 @@ import { AppointmentsService } from './appointments.service';
 import { SlotsService } from './slots.service';
 import { CreateAppointmentDto } from '../dto/create-appointment.dto';
 import { VerifyAppointmentDto } from '../dto/verify-appointment.dto';
-import { Appointment } from '../entities/appointment.entity';
 import { AvailableSlotsResponseDto } from '../dto/available-slots.dto';
 
 @ApiTags('appointments')
@@ -51,11 +50,8 @@ export class AppointmentsController {
   @ApiResponse({
     status: 201,
     description: 'Rendez-vous créé avec succès',
-    type: Appointment,
   })
-  async create(
-    @Body() createAppointmentDto: CreateAppointmentDto
-  ): Promise<Appointment> {
+  async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentsService.create(createAppointmentDto);
   }
 
@@ -95,9 +91,8 @@ export class AppointmentsController {
   @ApiResponse({
     status: 200,
     description: 'Liste des rendez-vous',
-    type: [Appointment],
   })
-  findAll(): Promise<Appointment[]> {
+  findAll() {
     return this.appointmentsService.findAll();
   }
 
@@ -106,9 +101,8 @@ export class AppointmentsController {
   @ApiResponse({
     status: 200,
     description: 'Rendez-vous trouvé',
-    type: Appointment,
   })
-  findOne(@Param('id') id: string): Promise<Appointment | null> {
+  findOne(@Param('id') id: string) {
     return this.appointmentsService.findOne(+id);
   }
 
@@ -117,12 +111,11 @@ export class AppointmentsController {
   @ApiResponse({
     status: 200,
     description: 'Statut mis à jour',
-    type: Appointment,
   })
   updateStatus(
     @Param('id') id: string,
     @Body() updateData: { status: string }
-  ): Promise<Appointment | null> {
+  ) {
     return this.appointmentsService.updateStatus(+id, updateData.status);
   }
 }

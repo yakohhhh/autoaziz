@@ -9,7 +9,7 @@ import {
 
 export enum ManualAppointmentSource {
   PHONE = 'phone',
-  CENTER = 'center',
+  CENTER = 'manual',
 }
 
 export enum VehicleType {

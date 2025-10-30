@@ -21,7 +21,10 @@ export class CalendarService {
     const where: {
       appointmentDate?: { gte: Date; lte: Date };
       status?: string;
-    } = {};
+      deletedAt?: null;
+    } = {
+      deletedAt: null, // Exclure les rendez-vous supprimés
+    };
 
     if (start && end) {
       where.appointmentDate = {
@@ -87,16 +90,23 @@ export class CalendarService {
   async updateAppointmentStatus(id: number, status: string) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
+      include: { customer: true },
     });
 
     if (!appointment) {
       throw new NotFoundException(`Rendez-vous #${id} introuvable`);
     }
 
+    // Mise à jour du statut ET de actualStatus dans Prisma (UNE SEULE BASE)
     const updated = await this.prisma.appointment.update({
       where: { id },
-      data: { status },
+      data: {
+        status,
+        actualStatus: status, // Synchroniser actualStatus avec status
+      },
     });
+
+    console.log(`✅ Appointment ${id} status updated to ${status}`);
 
     return {
       message: 'Statut mis à jour avec succès',
@@ -107,11 +117,12 @@ export class CalendarService {
   async getSlotAvailability(date: string) {
     const targetDate = new Date(date);
 
-    // Récupérer tous les RDV du jour
+    // Récupérer tous les RDV du jour (non supprimés et non annulés)
     const appointments = await this.prisma.appointment.findMany({
       where: {
         appointmentDate: targetDate,
         status: { notIn: ['cancelled'] },
+        deletedAt: null, // Exclure les rendez-vous supprimés
       },
       select: { appointmentTime: true },
     });
@@ -196,10 +207,22 @@ export class CalendarService {
     });
 
     if (!vehicle) {
+      // Nouveau véhicule pour ce client
       vehicle = await this.prisma.vehicle.create({
         data: {
           customerId: customer.id,
           licensePlate: dto.licensePlate,
+          vehicleType: dto.vehicleType,
+          vehicleBrand: dto.vehicleBrand,
+          vehicleModel: dto.vehicleModel,
+          fuelType: dto.fuelType,
+        },
+      });
+    } else {
+      // Véhicule existe : mettre à jour les infos si elles ont changé
+      vehicle = await this.prisma.vehicle.update({
+        where: { id: vehicle.id },
+        data: {
           vehicleType: dto.vehicleType,
           vehicleBrand: dto.vehicleBrand,
           vehicleModel: dto.vehicleModel,
@@ -256,6 +279,69 @@ export class CalendarService {
         appointmentDate: appointment.appointmentDate,
         appointmentTime: appointment.appointmentTime,
         source: dto.source,
+      },
+    };
+  }
+
+  async deleteAppointment(
+    id: number,
+    reason: string,
+    note?: string,
+    deletedBy?: string
+  ) {
+    // Validation du reason
+    if (!reason || reason.trim() === '') {
+      throw new Error('La raison de suppression est obligatoire');
+    }
+
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+      },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(`Rendez-vous #${id} introuvable`);
+    }
+
+    // Enregistrer la suppression dans la table de tracking
+    await this.prisma.appointmentDeletion.create({
+      data: {
+        appointmentId: id,
+        customerId: appointment.customerId,
+        customerName: `${appointment.firstName} ${appointment.lastName}`,
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        deletionReason: reason,
+        deletionNote: note || '',
+        deletedBy: deletedBy || 'Admin',
+      },
+    });
+
+    // Soft delete dans Prisma (UNE SEULE BASE - libère le créneau immédiatement)
+    await this.prisma.appointment.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        deletionReason: reason,
+        deletionNote: note || '',
+        status: 'cancelled',
+      },
+    });
+
+    console.log(`✅ Appointment ${id} deleted - slot freed for booking`);
+
+    return {
+      success: true,
+      message: 'Rendez-vous supprimé avec succès',
+      reason,
+      slotFreed: true,
+      appointmentDetails: {
+        id: appointment.id,
+        customerName: `${appointment.firstName} ${appointment.lastName}`,
+        date: appointment.appointmentDate,
+        time: appointment.appointmentTime,
       },
     };
   }

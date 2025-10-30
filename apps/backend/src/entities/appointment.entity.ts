@@ -81,6 +81,22 @@ export class Appointment {
   notes: string;
 
   @ApiProperty()
+  @Column({ name: 'actualStatus', nullable: true })
+  actualStatus: string;
+
+  @ApiProperty()
+  @Column({ name: 'deletedAt', type: 'timestamp', nullable: true })
+  deletedAt: Date;
+
+  @ApiProperty()
+  @Column({ name: 'deletionReason', nullable: true })
+  deletionReason: string;
+
+  @ApiProperty()
+  @Column({ name: 'deletionNote', type: 'text', nullable: true })
+  deletionNote: string;
+
+  @ApiProperty()
   @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 }

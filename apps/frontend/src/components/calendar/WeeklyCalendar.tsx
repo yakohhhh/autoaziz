@@ -187,9 +187,6 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                       {!slot.available && (
                         <span className='badge'>Complet</span>
                       )}
-                      {slot.available && slot.reserved && (
-                        <span className='badge limited'>Places limitées</span>
-                      )}
                     </button>
                   ))}
               </div>
@@ -206,10 +203,6 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         <div className='legend-item'>
           <span className='dot selected'></span>
           <span>Sélectionné</span>
-        </div>
-        <div className='legend-item'>
-          <span className='dot limited'></span>
-          <span>Places limitées</span>
         </div>
         <div className='legend-item'>
           <span className='dot unavailable'></span>

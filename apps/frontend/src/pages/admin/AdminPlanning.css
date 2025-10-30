@@ -179,38 +179,19 @@
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
-  height: calc(100vh - 140px);
-  min-height: 600px;
-  overflow: auto;
+  height: auto; /* Permettre au contenu de définir la hauteur */
+  min-height: calc(100vh - 140px);
+  overflow: visible; /* Le scroll sera géré par le body */
   position: relative;
-  scroll-behavior: smooth;
-}
-
-.calendar-container::-webkit-scrollbar {
-  width: 10px;
-}
-
-.calendar-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.calendar-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-  transition: background 0.2s ease;
-}
-
-.calendar-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 
 /* Override react-big-calendar styles */
 .rbc-calendar {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  height: 100%;
+  height: auto; /* Laisser le contenu définir la hauteur */
+  min-height: 800px; /* Hauteur minimum pour afficher tout le planning */
   font-size: 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .rbc-calendar * {
@@ -644,8 +625,120 @@
 .modal-actions h3 {
   margin: 0 0 1rem 0;
   color: #1f2937;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
+/* Nouvelle grille de boutons de statut */
+.status-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.status-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.status-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.status-btn:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.status-icon {
+  font-size: 2rem;
+}
+
+.status-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-btn-confirmed {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.status-btn-confirmed:not(:disabled):hover {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+}
+
+.status-btn-completed {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.status-btn-completed:not(:disabled):hover {
+  background: #6366f1;
+  color: white;
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
+}
+
+.status-btn-no-show {
+  border-color: #f97316;
+  color: #f97316;
+}
+
+.status-btn-no-show:not(:disabled):hover {
+  background: #f97316;
+  color: white;
+  box-shadow: 0 6px 12px rgba(249, 115, 22, 0.3);
+}
+
+.status-btn-cancelled {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.status-btn-cancelled:not(:disabled):hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete-appointment {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.btn-delete-appointment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Anciens styles pour compatibilité */
 .status-buttons {
   display: flex;
   flex-direction: column;
@@ -715,6 +808,24 @@
   background: #ea580c;
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+  width: 100%;
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.4);
 }
 
 @media (max-width: 768px) {

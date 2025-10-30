@@ -9,13 +9,80 @@ export class CustomersService {
     this.prisma = new PrismaClient();
   }
 
+  async createCustomer(createCustomerDto: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    notes?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+    licensePlate?: string;
+  }) {
+    // Crée le client
+    const newCustomer = await this.prisma.customer.create({
+      data: {
+        firstName: createCustomerDto.firstName,
+        lastName: createCustomerDto.lastName,
+        email: createCustomerDto.email,
+        phone: createCustomerDto.phone,
+        notes: createCustomerDto.notes || '',
+      },
+    });
+
+    // Si des informations de véhicule sont fournies, crée le véhicule
+    let vehicle: {
+      id: number;
+      vehicleBrand: string;
+      vehicleModel: string;
+      licensePlate: string;
+    } | null = null;
+    if (
+      createCustomerDto.vehicleBrand ||
+      createCustomerDto.vehicleModel ||
+      createCustomerDto.licensePlate
+    ) {
+      vehicle = await this.prisma.vehicle.create({
+        data: {
+          customerId: newCustomer.id,
+          vehicleBrand: createCustomerDto.vehicleBrand || '',
+          vehicleModel: createCustomerDto.vehicleModel || '',
+          licensePlate: createCustomerDto.licensePlate || '',
+          vehicleType: 'Voiture',
+          fuelType: null,
+        },
+      });
+    }
+
+    return {
+      id: newCustomer.id,
+      firstName: newCustomer.firstName,
+      lastName: newCustomer.lastName,
+      fullName: `${newCustomer.firstName} ${newCustomer.lastName}`,
+      email: newCustomer.email,
+      phone: newCustomer.phone,
+      notes: newCustomer.notes ?? '',
+      vehicle: vehicle
+        ? {
+            id: vehicle.id,
+            vehicleBrand: String(vehicle.vehicleBrand),
+            vehicleModel: String(vehicle.vehicleModel),
+            licensePlate: String(vehicle.licensePlate),
+          }
+        : null,
+      createdAt: newCustomer.createdAt,
+    };
+  }
+
   async getAllCustomers() {
     const customers = await this.prisma.customer.findMany({
       include: {
         vehicles: true,
         appointments: {
+          where: {
+            deletedAt: null, // Exclure les RDV supprimés
+          },
           orderBy: { appointmentDate: 'desc' },
-          take: 10,
         },
         _count: {
           select: {
@@ -27,26 +94,39 @@ export class CustomersService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return customers.map(customer => ({
-      id: customer.id,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      fullName: `${customer.firstName} ${customer.lastName}`,
-      email: customer.email,
-      phone: customer.phone,
-      notes: customer.notes,
-      statistics: {
-        totalVisits: customer.totalVisits,
-        totalCancellations: customer.totalCancellations,
-        totalNoShows: customer.totalNoShows,
-        totalSpent: customer.totalSpent,
-        totalAppointments: customer._count.appointments,
-        totalVehicles: customer._count.vehicles,
-      },
-      vehicles: customer.vehicles,
-      recentAppointments: customer.appointments,
-      createdAt: customer.createdAt,
-    }));
+    return customers.map(customer => {
+      // Calcul des statistiques réelles basées sur actualStatus
+      const completedCount = customer.appointments.filter(
+        apt => apt.actualStatus === 'completed'
+      ).length;
+      const cancelledCount = customer.appointments.filter(
+        apt => apt.actualStatus === 'cancelled'
+      ).length;
+      const noShowCount = customer.appointments.filter(
+        apt => apt.actualStatus === 'no_show'
+      ).length;
+
+      return {
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        fullName: `${customer.firstName} ${customer.lastName}`,
+        email: customer.email,
+        phone: customer.phone,
+        notes: customer.notes,
+        statistics: {
+          totalVisits: completedCount,
+          totalCancellations: cancelledCount,
+          totalNoShows: noShowCount,
+          totalSpent: customer.totalSpent,
+          totalAppointments: customer.appointments.length,
+          totalVehicles: customer._count.vehicles,
+        },
+        vehicles: customer.vehicles,
+        appointments: customer.appointments,
+        createdAt: customer.createdAt,
+      };
+    });
   }
 
   async getCustomerById(id: number) {
@@ -55,6 +135,9 @@ export class CustomersService {
       include: {
         vehicles: true,
         appointments: {
+          where: {
+            deletedAt: null, // Exclure les RDV supprimés
+          },
           orderBy: { appointmentDate: 'desc' },
         },
       },
@@ -63,6 +146,17 @@ export class CustomersService {
     if (!customer) {
       return null;
     }
+
+    // Calcul des statistiques réelles basées sur actualStatus
+    const completedCount = customer.appointments.filter(
+      apt => apt.actualStatus === 'completed'
+    ).length;
+    const cancelledCount = customer.appointments.filter(
+      apt => apt.actualStatus === 'cancelled'
+    ).length;
+    const noShowCount = customer.appointments.filter(
+      apt => apt.actualStatus === 'no_show'
+    ).length;
 
     return {
       id: customer.id,
@@ -73,9 +167,9 @@ export class CustomersService {
       phone: customer.phone,
       notes: customer.notes,
       statistics: {
-        totalVisits: customer.totalVisits,
-        totalCancellations: customer.totalCancellations,
-        totalNoShows: customer.totalNoShows,
+        totalVisits: completedCount,
+        totalCancellations: cancelledCount,
+        totalNoShows: noShowCount,
         totalSpent: customer.totalSpent,
       },
       vehicles: customer.vehicles,
@@ -131,7 +225,7 @@ export class CustomersService {
 
   async updateCustomerStatistics(
     customerId: number,
-    appointmentStatus: string,
+    appointmentStatus: string
   ) {
     const updates: Record<string, { increment: number }> = {};
 
@@ -149,6 +243,64 @@ export class CustomersService {
         data: updates,
       });
     }
+  }
+
+  async deleteCustomer(
+    id: number,
+    reason: string,
+    note?: string,
+    deletedBy?: string
+  ) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: {
+        appointments: true,
+        vehicles: true,
+      },
+    });
+
+    if (!customer) {
+      throw new Error(`Client #${id} introuvable`);
+    }
+
+    // Enregistrer la suppression dans la table de tracking
+    await this.prisma.customerDeletion.create({
+      data: {
+        customerId: id,
+        customerName: `${customer.firstName} ${customer.lastName}`,
+        email: customer.email,
+        phone: customer.phone,
+        deletionReason: reason,
+        deletionNote: note || '',
+        appointmentsCount: customer.appointments.length,
+        deletedBy: deletedBy || 'Admin',
+      },
+    });
+
+    // Supprimer tous les RDV du client (soft delete)
+    await this.prisma.appointment.updateMany({
+      where: { customerId: id },
+      data: {
+        deletedAt: new Date(),
+        deletionReason: 'client_deleted',
+        deletionNote: `Client supprimé: ${reason}`,
+        status: 'cancelled', // Libère les créneaux
+      },
+    });
+
+    // Supprimer le client et ses véhicules (cascade)
+    await this.prisma.customer.delete({
+      where: { id },
+    });
+
+    return {
+      success: true,
+      message: 'Client supprimé avec succès',
+      reason,
+      customerName: `${customer.firstName} ${customer.lastName}`,
+      appointmentsFreed: customer.appointments.length,
+      vehiclesDeleted: customer.vehicles.length,
+    };
   }
 
   async onModuleDestroy() {

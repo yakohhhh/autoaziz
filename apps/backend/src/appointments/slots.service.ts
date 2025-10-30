@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
-import { Appointment } from '../entities/appointment.entity';
+import { PrismaClient } from '../../generated/prisma';
 import {
   AvailableSlotsResponseDto,
   DaySlots,
@@ -18,10 +16,11 @@ dayjs.locale('fr');
 
 @Injectable()
 export class SlotsService {
-  constructor(
-    @InjectRepository(Appointment)
-    private appointmentRepository: Repository<Appointment>
-  ) {}
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
   private readonly TIMEZONE = 'Europe/Paris';
   private readonly OPENING_HOURS = {
@@ -56,7 +55,7 @@ export class SlotsService {
     sunday: [],
   };
   private readonly SLOT_DURATION = 30;
-  private readonly CAPACITY_PER_SLOT = 2;
+  private readonly CAPACITY_PER_SLOT = 1; // 1 créneau = 1 client uniquement
   async getAvailableSlots(
     weekOffset: number = 0
   ): Promise<AvailableSlotsResponseDto> {
@@ -64,9 +63,13 @@ export class SlotsService {
     const today = now.startOf('day');
     const startOfWeek = this.getStartOfWeek(today, weekOffset);
     const endOfWeek = startOfWeek.add(6, 'day');
-    const appointments = await this.appointmentRepository.find({
+    const appointments = await this.prisma.appointment.findMany({
       where: {
-        appointmentDate: Between(startOfWeek.toDate(), endOfWeek.toDate()),
+        appointmentDate: {
+          gte: startOfWeek.toDate(),
+          lte: endOfWeek.toDate(),
+        },
+        deletedAt: null, // Exclure les rendez-vous supprimés
       },
     });
     const days: DaySlots[] = [];
@@ -85,7 +88,7 @@ export class SlotsService {
   private generateDaySlots(
     date: dayjs.Dayjs,
     now: dayjs.Dayjs,
-    appointments: Appointment[]
+    appointments: any[]
   ): DaySlots {
     const today = now.startOf('day');
     const dateString = date.format('YYYY-MM-DD');
@@ -101,12 +104,13 @@ export class SlotsService {
     const reservationsBySlot = new Map<string, number>();
     appointments
       .filter(apt => {
-        const aptDate = dayjs(apt.appointmentDate).tz(this.TIMEZONE);
+        const aptDate = dayjs(apt.appointmentDate as Date).tz(this.TIMEZONE);
         return aptDate.format('YYYY-MM-DD') === dateString;
       })
       .forEach(apt => {
-        const count = reservationsBySlot.get(apt.appointmentTime) || 0;
-        reservationsBySlot.set(apt.appointmentTime, count + 1);
+        const timeStr = apt.appointmentTime as string;
+        const count = reservationsBySlot.get(timeStr) || 0;
+        reservationsBySlot.set(timeStr, count + 1);
       });
     const isToday = date.isSame(today, 'day');
     const slots: TimeSlot[] = availableHours
@@ -168,10 +172,11 @@ export class SlotsService {
       };
     }
     const appointmentDate = appointmentDateTime.toDate();
-    const existingAppointments = await this.appointmentRepository.count({
+    const existingAppointments = await this.prisma.appointment.count({
       where: {
         appointmentDate: appointmentDate,
         appointmentTime: time,
+        deletedAt: null, // Exclure les rendez-vous supprimés
       },
     });
 

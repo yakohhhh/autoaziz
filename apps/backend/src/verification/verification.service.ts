@@ -1,20 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Appointment } from '../entities/appointment.entity';
 import { EmailService } from '../email/email.service';
 import { SmsService } from '../sms/sms.service';
+import { PrismaClient } from '../../generated/prisma';
 
 @Injectable()
 export class VerificationService {
   private readonly logger = new Logger(VerificationService.name);
+  private prisma: PrismaClient;
 
   constructor(
-    @InjectRepository(Appointment)
-    private appointmentRepository: Repository<Appointment>,
     private emailService: EmailService,
     private smsService: SmsService
-  ) {}
+  ) {
+    this.prisma = new PrismaClient();
+  }
 
   generateVerificationCode(): string {
     // Génère un code à 6 chiffres
@@ -22,7 +21,7 @@ export class VerificationService {
   }
 
   async initiateVerification(appointmentId: number): Promise<void> {
-    const appointment = await this.appointmentRepository.findOne({
+    const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
     });
 
@@ -35,13 +34,16 @@ export class VerificationService {
     const expiryTime = new Date();
     expiryTime.setMinutes(expiryTime.getMinutes() + 10); // Expire dans 10 minutes
 
-    // Met à jour le rendez-vous avec le code
-    await this.appointmentRepository.update(appointmentId, {
-      verificationCode,
-      verificationCodeExpiry: expiryTime,
-      emailVerified: false,
-      phoneVerified: false,
-      status: 'pending_verification',
+    // Met à jour le rendez-vous avec le code (UNE SEULE BASE - Prisma)
+    await this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: {
+        verificationCode,
+        verificationCodeExpiry: expiryTime,
+        emailVerified: false,
+        phoneVerified: false,
+        status: 'pending_verification',
+      },
     });
 
     // Envoie le code par email et SMS
@@ -64,7 +66,7 @@ export class VerificationService {
     code: string,
     verificationType: 'email' | 'phone'
   ): Promise<{ success: boolean; message: string }> {
-    const appointment = await this.appointmentRepository.findOne({
+    const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
     });
 
@@ -78,22 +80,28 @@ export class VerificationService {
     }
 
     // Vérifie si le code n'a pas expiré
-    if (new Date() > appointment.verificationCodeExpiry) {
+    if (
+      !appointment.verificationCodeExpiry ||
+      new Date() > appointment.verificationCodeExpiry
+    ) {
       return { success: false, message: 'Code de vérification expiré' };
     }
 
     // Marque le type de vérification comme validé
-    const updateData: Partial<Appointment> = {};
+    const updateData: any = {};
     if (verificationType === 'email') {
       updateData.emailVerified = true;
     } else {
       updateData.phoneVerified = true;
     }
 
-    await this.appointmentRepository.update(appointmentId, updateData);
+    await this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: updateData,
+    });
 
     // Vérifie si les deux vérifications sont complètes
-    const updatedAppointment = await this.appointmentRepository.findOne({
+    const updatedAppointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
     });
 
@@ -124,7 +132,7 @@ export class VerificationService {
   }
 
   private async confirmAppointment(appointmentId: number): Promise<void> {
-    const appointment = await this.appointmentRepository.findOne({
+    const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
     });
 
@@ -132,19 +140,26 @@ export class VerificationService {
       throw new Error('Rendez-vous non trouvé pour confirmation');
     }
 
-    // Met à jour le statut
-    await this.appointmentRepository.update(appointmentId, {
-      status: 'confirmed',
-      verificationCode: undefined, // Supprime le code pour sécurité
-      verificationCodeExpiry: undefined,
+    // Met à jour le statut (UNE SEULE BASE - Prisma uniquement)
+    await this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: {
+        status: 'confirmed',
+        verificationCode: null, // Supprime le code pour sécurité
+        verificationCodeExpiry: null,
+        emailVerified: true,
+        phoneVerified: true,
+      },
     });
+
+    console.log(`✅ Appointment ${appointmentId} confirmed in Prisma`);
 
     // Envoie l'email de confirmation final
     const fullName = `${appointment.firstName} ${appointment.lastName}`;
     await this.emailService.sendAppointmentConfirmedEmail(
       appointment.email,
       fullName,
-      appointment.appointmentDate.toString(),
+      appointment.appointmentDate.toISOString().split('T')[0],
       appointment.appointmentTime
     );
 
@@ -153,7 +168,7 @@ export class VerificationService {
       fullName,
       appointment.email,
       appointment.phone,
-      appointment.appointmentDate.toString(),
+      appointment.appointmentDate.toISOString().split('T')[0],
       appointment.appointmentTime,
       appointment.vehicleRegistration
     );
@@ -162,7 +177,7 @@ export class VerificationService {
   }
 
   async resendVerificationCode(appointmentId: number): Promise<void> {
-    const appointment = await this.appointmentRepository.findOne({
+    const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
     });
 

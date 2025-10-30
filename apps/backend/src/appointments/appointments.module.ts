@@ -1,18 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { SlotsService } from './slots.service';
-import { Appointment } from '../entities/appointment.entity';
 import { EmailModule } from '../email/email.module';
 import { VerificationModule } from '../verification/verification.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Appointment]),
-    EmailModule,
-    VerificationModule,
-  ],
+  imports: [EmailModule, VerificationModule],
   providers: [AppointmentsService, SlotsService],
   controllers: [AppointmentsController],
 })

@@ -2,8 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -48,9 +49,9 @@ model Vehicle {
   id                  Int           @id @default(autoincrement())
   customerId          Int
   licensePlate        String
-  vehicleType         String
-  vehicleBrand        String
-  vehicleModel        String
+  vehicleType         String        @map("type")
+  vehicleBrand        String        @map("brand")
+  vehicleModel        String        @map("model")
   fuelType            String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
@@ -88,6 +89,9 @@ model Appointment {
   price                    Float?
   actualStatus             String?   // 'completed', 'no_show', 'cancelled'
   source                   String?   // 'online', 'phone', 'center'
+  deletedAt                DateTime?
+  deletionReason           String?
+  deletionNote             String?   @db.Text
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @default(now()) @updatedAt
   
@@ -100,4 +104,38 @@ model Appointment {
   @@index([status])
   @@index([customerId])
   @@index([vehicleId])
+  @@index([deletedAt])
+}
+
+model AppointmentDeletion {
+  id                Int       @id @default(autoincrement())
+  appointmentId     Int
+  customerId        Int?
+  customerName      String?
+  appointmentDate   DateTime? @db.Date
+  appointmentTime   String?
+  deletionReason    String
+  deletionNote      String?   @db.Text
+  deletedBy         String?
+  deletedAt         DateTime  @default(now())
+
+  @@map("appointment_deletions")
+  @@index([deletionReason])
+  @@index([deletedAt])
+}
+
+model CustomerDeletion {
+  id                 Int       @id @default(autoincrement())
+  customerId         Int
+  customerName       String?
+  email              String?
+  phone              String?
+  deletionReason     String
+  deletionNote       String?   @db.Text
+  appointmentsCount  Int       @default(0)
+  deletedBy          String?
+  deletedAt          DateTime  @default(now())
+
+  @@map("customer_deletions")
+  @@index([deletedAt])
 }

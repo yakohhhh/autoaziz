@@ -5,6 +5,7 @@ import { format, parse, getDay, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './AdminPlanning.css';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
 const locales = {
   fr: fr,
@@ -20,6 +21,8 @@ const localizer = dateFnsLocalizer({
 
 interface AppointmentEvent extends Event {
   id: number;
+  start: Date;
+  end: Date;
   resource: {
     id: number;
     customerName: string;
@@ -43,6 +46,10 @@ const AdminPlanning: React.FC = () => {
   );
   const [showModal, setShowModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<number | null>(
+    null
+  );
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date()); // Date de navigation
   const [loading, setLoading] = useState(true);
@@ -88,6 +95,9 @@ const AdminPlanning: React.FC = () => {
 
   const loadAppointments = async (silent = false) => {
     try {
+      // Sauvegarder la position de scroll avant le rechargement
+      const currentScrollTop = window.scrollY || window.pageYOffset;
+
       if (!silent) setLoading(true);
       const token = localStorage.getItem('authToken');
       const response = await fetch(
@@ -117,6 +127,16 @@ const AdminPlanning: React.FC = () => {
       });
 
       setEvents(formattedEvents);
+
+      // Restaurer la position de scroll après le rechargement
+      if (currentScrollTop > 0) {
+        setTimeout(() => {
+          window.scrollTo({
+            top: currentScrollTop,
+            behavior: 'auto', // Pas de smooth pour éviter l'animation
+          });
+        }, 50);
+      }
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
@@ -141,6 +161,9 @@ const AdminPlanning: React.FC = () => {
 
       if (!response.ok) throw new Error('Erreur de mise à jour');
 
+      // Déclencher un événement pour mettre à jour les stats dans la page Clients
+      localStorage.setItem('appointment_status_changed', Date.now().toString());
+      
       // Recharger les rendez-vous
       await loadAppointments();
       setShowModal(false);
@@ -148,6 +171,56 @@ const AdminPlanning: React.FC = () => {
     } catch (error) {
       console.error('Erreur:', error);
       alert('Erreur lors de la mise à jour du statut');
+    }
+  };
+
+  const handleDeleteAppointment = async (reason: string, note: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/calendar/appointments/${appointmentToDelete}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            reason,
+            note,
+            deletedBy: localStorage.getItem('userName') || 'Admin',
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Fermer immédiatement les modals
+        setShowDeleteModal(false);
+        setAppointmentToDelete(null);
+        setShowModal(false);
+        setSelectedEvent(null);
+        
+        // Recharger les rendez-vous
+        await loadAppointments();
+        
+        alert(
+          '✅ Rendez-vous supprimé ! Le créneau est maintenant disponible.'
+        );
+      } else {
+        const error = await response.json();
+        console.error('Erreur suppression:', error);
+        alert(
+          '❌ Erreur lors de la suppression: ' +
+            (error.message || 'Erreur inconnue')
+        );
+        setShowDeleteModal(false);
+        setAppointmentToDelete(null);
+      }
+    } catch (error) {
+      console.error('Erreur suppression:', error);
+      alert('❌ Erreur lors de la suppression du rendez-vous');
+      setShowDeleteModal(false);
+      setAppointmentToDelete(null);
     }
   };
 
@@ -254,12 +327,12 @@ const AdminPlanning: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
-      pending: '⏳ En attente',
-      pending_verification: '📧 En attente de vérification',
-      confirmed: '✅ Confirmé',
-      completed: '🎉 Terminé',
-      cancelled: '❌ Annulé',
-      no_show: '🚫 Absent',
+      pending: 'En attente',
+      pending_verification: 'En attente de vérification',
+      confirmed: 'Confirmé',
+      completed: 'Terminé',
+      cancelled: 'Annulé',
+      no_show: 'Absent',
     };
     return labels[status] || status;
   };
@@ -356,507 +429,570 @@ const AdminPlanning: React.FC = () => {
           <div className='planning-header'>
             <div className='header-compact'>
               <button
-            onClick={() => navigate('/admin/dashboard')}
-            className='icon-btn back-btn'
-            title='Retour au Dashboard'
-          >
-            ← Dashboard
-          </button>
-
-          <input
-            type='date'
-            className='date-picker'
-            value={format(currentDate, 'yyyy-MM-dd')}
-            onChange={e => setCurrentDate(new Date(e.target.value))}
-            title='Choisir une date'
-          />
-
-          <div className='filters-compact'>
-            <button
-              className={filter === 'all' ? 'active' : ''}
-              onClick={() => setFilter('all')}
-              title='Tous les rendez-vous'
-            >
-              Tous ({events.length})
-            </button>
-            <button
-              className={filter === 'pending' ? 'active pending' : 'pending'}
-              onClick={() => setFilter('pending')}
-              title='En attente'
-            >
-              ⏳ {events.filter(e => e.resource.status === 'pending').length}
-            </button>
-            <button
-              className={
-                filter === 'confirmed' ? 'active confirmed' : 'confirmed'
-              }
-              onClick={() => setFilter('confirmed')}
-              title='Confirmés'
-            >
-              ✅ {events.filter(e => e.resource.status === 'confirmed').length}
-            </button>
-            <button
-              className={
-                filter === 'completed' ? 'active completed' : 'completed'
-              }
-              onClick={() => setFilter('completed')}
-              title='Complétés'
-            >
-              🎉 {events.filter(e => e.resource.status === 'completed').length}
-            </button>
-            <button
-              className={
-                filter === 'cancelled' ? 'active cancelled' : 'cancelled'
-              }
-              onClick={() => setFilter('cancelled')}
-              title='Annulés'
-            >
-              ❌ {events.filter(e => e.resource.status === 'cancelled').length}
-            </button>
-          </div>
-
-          <button
-            onClick={() => loadAppointments(false)}
-            className='icon-btn refresh-btn'
-            title='Actualiser le planning'
-          >
-            🔄
-          </button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className='loading'>Chargement du planning...</div>
-      ) : (
-        <div className='calendar-container'>
-          <Calendar
-            localizer={localizer}
-            events={filteredEvents}
-            startAccessor='start'
-            endAccessor='end'
-            style={{ height: '100%' }}
-            onSelectEvent={handleSelectEvent}
-            eventPropGetter={getEventStyle}
-            messages={messages}
-            culture='fr'
-            defaultView='week'
-            views={['week', 'day', 'agenda']}
-            step={15}
-            timeslots={1}
-            min={new Date(2024, 0, 1, 7, 0, 0)}
-            max={new Date(2024, 0, 1, 20, 0, 0)}
-            scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
-            date={currentDate}
-            onNavigate={newDate => setCurrentDate(newDate)}
-            components={{
-              week: {
-                header: CustomDayHeader,
-              },
-            }}
-          />
-        </div>
-      )}
-
-      {showModal && selectedEvent && (
-        <div className='modal-overlay' onClick={() => setShowModal(false)}>
-          <div className='modal-content' onClick={e => e.stopPropagation()}>
-            <div className='modal-header'>
-              <h2>Détails du Rendez-vous #{selectedEvent.resource.id}</h2>
-              <button onClick={() => setShowModal(false)} className='close-btn'>
-                ✕
-              </button>
-            </div>
-
-            <div className='modal-body'>
-              <div className='info-section'>
-                <h3>👤 Client</h3>
-                <p>
-                  <strong>Nom:</strong> {selectedEvent.resource.customerName}
-                </p>
-                <p>
-                  <strong>Email:</strong> {selectedEvent.resource.email}
-                </p>
-                <p>
-                  <strong>Téléphone:</strong> {selectedEvent.resource.phone}
-                </p>
-              </div>
-
-              <div className='info-section'>
-                <h3>🚗 Véhicule</h3>
-                <p>
-                  <strong>Type:</strong> {selectedEvent.resource.vehicleType}
-                </p>
-                <p>
-                  <strong>Marque:</strong> {selectedEvent.resource.vehicleBrand}
-                </p>
-                <p>
-                  <strong>Modèle:</strong> {selectedEvent.resource.vehicleModel}
-                </p>
-                <p>
-                  <strong>Immatriculation:</strong>{' '}
-                  {selectedEvent.resource.vehicleRegistration}
-                </p>
-              </div>
-
-              <div className='info-section'>
-                <h3>📅 Rendez-vous</h3>
-                <p>
-                  <strong>Date:</strong>{' '}
-                  {selectedEvent.start
-                    ? format(selectedEvent.start, 'dd MMMM yyyy', {
-                        locale: fr,
-                      })
-                    : 'N/A'}
-                </p>
-                <p>
-                  <strong>Heure:</strong> {selectedEvent.resource.time}
-                </p>
-                <p>
-                  <strong>Source:</strong>{' '}
-                  {selectedEvent.resource.notes?.includes('[MANUEL]') ? (
-                    <span className='source-badge manual'>🟢 RDV Manuel</span>
-                  ) : (
-                    <span className='source-badge online'>🌐 RDV En Ligne</span>
-                  )}
-                </p>
-                <p>
-                  <strong>Statut:</strong>
-                  <span
-                    className={`status-badge ${selectedEvent.resource.status}`}
-                  >
-                    {getStatusLabel(selectedEvent.resource.status)}
-                  </span>
-                </p>
-              </div>
-
-              {selectedEvent.resource.notes && (
-                <div className='info-section'>
-                  <h3>📝 Notes</h3>
-                  <p>{selectedEvent.resource.notes}</p>
-                </div>
-              )}
-            </div>
-
-            <div className='modal-actions'>
-              <h3>⚙️ Changer le statut:</h3>
-              <div className='status-buttons'>
-                {selectedEvent.resource.status !== 'pending' && (
-                  <button
-                    onClick={() =>
-                      updateStatus(selectedEvent.resource.id, 'pending')
-                    }
-                    className='btn-pending'
-                  >
-                    ⏳ En attente
-                  </button>
-                )}
-                {selectedEvent.resource.status !== 'confirmed' && (
-                  <button
-                    onClick={() =>
-                      updateStatus(selectedEvent.resource.id, 'confirmed')
-                    }
-                    className='btn-confirmed'
-                  >
-                    ✅ Confirmer
-                  </button>
-                )}
-                {selectedEvent.resource.status !== 'completed' && (
-                  <button
-                    onClick={() =>
-                      updateStatus(selectedEvent.resource.id, 'completed')
-                    }
-                    className='btn-completed'
-                  >
-                    🎉 Terminer
-                  </button>
-                )}
-                {selectedEvent.resource.status !== 'no_show' && (
-                  <button
-                    onClick={() =>
-                      updateStatus(selectedEvent.resource.id, 'no_show')
-                    }
-                    className='btn-no-show'
-                  >
-                    ❌ Absent
-                  </button>
-                )}
-                {selectedEvent.resource.status !== 'cancelled' && (
-                  <button
-                    onClick={() =>
-                      updateStatus(selectedEvent.resource.id, 'cancelled')
-                    }
-                    className='btn-cancelled'
-                  >
-                    ❌ Annuler
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de création de RDV */}
-      {showCreateModal && selectedDate && (
-        <div
-          className='modal-overlay'
-          onClick={() => {
-            setShowCreateModal(false);
-            setFormError('');
-          }}
-        >
-          <div
-            className='modal-content create-modal'
-            onClick={e => e.stopPropagation()}
-          >
-            <div className='modal-header'>
-              <h2>➕ Nouveau Rendez-vous</h2>
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  setFormError('');
-                }}
-                className='close-btn'
+                onClick={() => navigate('/admin/dashboard')}
+                className='icon-btn back-btn'
+                title='Retour au Dashboard'
               >
-                ✕
+                ← Dashboard
+              </button>
+
+              <input
+                type='date'
+                className='date-picker'
+                value={format(currentDate, 'yyyy-MM-dd')}
+                onChange={e => setCurrentDate(new Date(e.target.value))}
+                title='Choisir une date'
+              />
+
+              <div className='filters-compact'>
+                <button
+                  className={filter === 'all' ? 'active' : ''}
+                  onClick={() => setFilter('all')}
+                  title='Tous les rendez-vous'
+                >
+                  Tous ({events.length})
+                </button>
+                <button
+                  className={
+                    filter === 'pending' ? 'active pending' : 'pending'
+                  }
+                  onClick={() => setFilter('pending')}
+                  title='En attente'
+                >
+                  ⏳{' '}
+                  {events.filter(e => e.resource.status === 'pending').length}
+                </button>
+                <button
+                  className={
+                    filter === 'confirmed' ? 'active confirmed' : 'confirmed'
+                  }
+                  onClick={() => setFilter('confirmed')}
+                  title='Confirmés'
+                >
+                  ✅{' '}
+                  {events.filter(e => e.resource.status === 'confirmed').length}
+                </button>
+                <button
+                  className={
+                    filter === 'completed' ? 'active completed' : 'completed'
+                  }
+                  onClick={() => setFilter('completed')}
+                  title='Complétés'
+                >
+                  🎉{' '}
+                  {events.filter(e => e.resource.status === 'completed').length}
+                </button>
+                <button
+                  className={
+                    filter === 'cancelled' ? 'active cancelled' : 'cancelled'
+                  }
+                  onClick={() => setFilter('cancelled')}
+                  title='Annulés'
+                >
+                  ❌{' '}
+                  {events.filter(e => e.resource.status === 'cancelled').length}
+                </button>
+              </div>
+
+              <button
+                onClick={() => loadAppointments(false)}
+                className='icon-btn refresh-btn'
+                title='Actualiser le planning'
+              >
+                🔄
               </button>
             </div>
-
-            <form onSubmit={handleCreateAppointment} className='modal-body'>
-              <p className='selected-date-info'>
-                📅 {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
-              </p>
-
-              {formError && (
-                <div className='error-message'>❌ {formError}</div>
-              )}
-
-              <div className='source-selection'>
-                <h3>📞 Source du rendez-vous *</h3>
-                <div className='source-buttons'>
-                  <button
-                    type='button'
-                    className={`source-btn phone ${formData.source === 'phone' ? 'active' : ''}`}
-                    onClick={() =>
-                      setFormData({ ...formData, source: 'phone' })
-                    }
-                  >
-                    📞 Par téléphone
-                  </button>
-                  <button
-                    type='button'
-                    className={`source-btn center ${formData.source === 'center' ? 'active' : ''}`}
-                    onClick={() =>
-                      setFormData({ ...formData, source: 'center' })
-                    }
-                  >
-                    🏢 Au centre
-                  </button>
-                </div>
-              </div>
-
-              <div className='form-section'>
-                <h3>👤 Informations client</h3>
-                <div className='form-row'>
-                  <div className='form-group'>
-                    <label>Prénom *</label>
-                    <input
-                      type='text'
-                      value={formData.firstName}
-                      onChange={e =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
-                      required
-                      placeholder='Jean'
-                    />
-                  </div>
-                  <div className='form-group'>
-                    <label>Nom *</label>
-                    <input
-                      type='text'
-                      value={formData.lastName}
-                      onChange={e =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
-                      required
-                      placeholder='Dupont'
-                    />
-                  </div>
-                </div>
-
-                <div className='form-row'>
-                  <div className='form-group'>
-                    <label>Email *</label>
-                    <input
-                      type='email'
-                      value={formData.email}
-                      onChange={e =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                      placeholder='jean.dupont@email.com'
-                    />
-                  </div>
-                  <div className='form-group'>
-                    <label>Téléphone *</label>
-                    <input
-                      type='tel'
-                      value={formData.phone}
-                      onChange={e =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      required
-                      placeholder='06 12 34 56 78'
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className='form-section'>
-                <h3>🚗 Véhicule</h3>
-                <div className='form-group'>
-                  <label>Type de véhicule *</label>
-                  <select
-                    value={formData.vehicleType}
-                    onChange={e =>
-                      setFormData({ ...formData, vehicleType: e.target.value })
-                    }
-                    required
-                  >
-                    <option value=''>Sélectionnez un type</option>
-                    <option value='Voiture'>Voiture</option>
-                    <option value='Moto'>Moto</option>
-                    <option value='Quad'>Quad</option>
-                    <option value='Scooter'>Scooter</option>
-                    <option value='Utilitaire léger'>Utilitaire léger</option>
-                  </select>
-                </div>
-
-                <div className='form-row'>
-                  <div className='form-group'>
-                    <label>Marque *</label>
-                    <input
-                      type='text'
-                      value={formData.vehicleBrand}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          vehicleBrand: e.target.value,
-                        })
-                      }
-                      required
-                      placeholder='Peugeot'
-                    />
-                  </div>
-                  <div className='form-group'>
-                    <label>Modèle *</label>
-                    <input
-                      type='text'
-                      value={formData.vehicleModel}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          vehicleModel: e.target.value,
-                        })
-                      }
-                      required
-                      placeholder='208'
-                    />
-                  </div>
-                </div>
-
-                <div className='form-row'>
-                  <div className='form-group'>
-                    <label>Immatriculation *</label>
-                    <input
-                      type='text'
-                      value={formData.licensePlate}
-                      onChange={e =>
-                        setFormData({
-                          ...formData,
-                          licensePlate: e.target.value,
-                        })
-                      }
-                      required
-                      placeholder='AB-123-CD'
-                    />
-                  </div>
-                  <div className='form-group'>
-                    <label>Type de carburant *</label>
-                    <select
-                      value={formData.fuelType}
-                      onChange={e =>
-                        setFormData({ ...formData, fuelType: e.target.value })
-                      }
-                      required
-                    >
-                      <option value=''>Sélectionnez</option>
-                      <option value='Essence'>Essence</option>
-                      <option value='Diesel'>Diesel</option>
-                      <option value='Hybride'>Hybride</option>
-                      <option value='Électrique'>Électrique</option>
-                      <option value='GPL'>GPL</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className='form-section'>
-                <h3>📅 Date et heure *</h3>
-                <div className='form-group'>
-                  <input
-                    type='datetime-local'
-                    value={formData.appointmentDate}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        appointmentDate: e.target.value,
-                      })
-                    }
-                    required
-                    min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                  />
-                </div>
-              </div>
-
-              <div className='form-section'>
-                <h3>📝 Notes (optionnel)</h3>
-                <div className='form-group'>
-                  <textarea
-                    value={formData.notes}
-                    onChange={e =>
-                      setFormData({ ...formData, notes: e.target.value })
-                    }
-                    placeholder='Informations supplémentaires...'
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className='modal-actions'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setFormError('');
-                  }}
-                  className='btn-secondary'
-                  disabled={formLoading}
-                >
-                  Annuler
-                </button>
-                <button
-                  type='submit'
-                  className='btn-primary'
-                  disabled={formLoading || !formData.source}
-                >
-                  {formLoading ? '⏳ Création...' : '✅ Créer le RDV'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+
+          {loading ? (
+            <div className='loading'>Chargement du planning...</div>
+          ) : (
+            <div className='calendar-container'>
+              <Calendar
+                localizer={localizer}
+                events={filteredEvents}
+                startAccessor='start'
+                endAccessor='end'
+                style={{ height: '100%' }}
+                onSelectEvent={handleSelectEvent}
+                eventPropGetter={getEventStyle}
+                messages={messages}
+                culture='fr'
+                defaultView='week'
+                views={['week', 'day', 'agenda']}
+                step={15}
+                timeslots={1}
+                min={new Date(2024, 0, 1, 7, 0, 0)}
+                max={new Date(2024, 0, 1, 20, 0, 0)}
+                scrollToTime={new Date(2024, 0, 1, 7, 0, 0)}
+                date={currentDate}
+                onNavigate={(newDate: Date) => setCurrentDate(newDate)}
+                components={{
+                  week: {
+                    header: CustomDayHeader,
+                  },
+                }}
+              />
+            </div>
+          )}
+
+          {showModal && selectedEvent && (
+            <div className='modal-overlay' onClick={() => setShowModal(false)}>
+              <div className='modal-content' onClick={e => e.stopPropagation()}>
+                <div className='modal-header'>
+                  <h2>Détails du Rendez-vous #{selectedEvent.resource.id}</h2>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className='close-btn'
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className='modal-body'>
+                  <div className='info-section'>
+                    <h3>👤 Client</h3>
+                    <p>
+                      <strong>Nom:</strong>{' '}
+                      {selectedEvent.resource.customerName}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {selectedEvent.resource.email}
+                    </p>
+                    <p>
+                      <strong>Téléphone:</strong> {selectedEvent.resource.phone}
+                    </p>
+                  </div>
+
+                  <div className='info-section'>
+                    <h3>🚗 Véhicule</h3>
+                    <p>
+                      <strong>Type:</strong>{' '}
+                      {selectedEvent.resource.vehicleType}
+                    </p>
+                    <p>
+                      <strong>Marque:</strong>{' '}
+                      {selectedEvent.resource.vehicleBrand}
+                    </p>
+                    <p>
+                      <strong>Modèle:</strong>{' '}
+                      {selectedEvent.resource.vehicleModel}
+                    </p>
+                    <p>
+                      <strong>Immatriculation:</strong>{' '}
+                      {selectedEvent.resource.vehicleRegistration}
+                    </p>
+                  </div>
+
+                  <div className='info-section'>
+                    <h3>📅 Rendez-vous</h3>
+                    <p>
+                      <strong>Date:</strong>{' '}
+                      {selectedEvent.start
+                        ? format(selectedEvent.start, 'dd MMMM yyyy', {
+                            locale: fr,
+                          })
+                        : 'N/A'}
+                    </p>
+                    <p>
+                      <strong>Heure:</strong> {selectedEvent.resource.time}
+                    </p>
+                    <p>
+                      <strong>Source:</strong>{' '}
+                      {selectedEvent.resource.notes?.includes('[MANUEL]') ? (
+                        <span className='source-badge manual'>
+                          🟢 RDV Manuel
+                        </span>
+                      ) : (
+                        <span className='source-badge online'>
+                          🌐 RDV En Ligne
+                        </span>
+                      )}
+                    </p>
+                    <p>
+                      <strong>Statut:</strong>
+                      <span
+                        className={`status-badge ${selectedEvent.resource.status}`}
+                      >
+                        {getStatusLabel(selectedEvent.resource.status)}
+                      </span>
+                    </p>
+                  </div>
+
+                  {selectedEvent.resource.notes && (
+                    <div className='info-section'>
+                      <h3>📝 Notes</h3>
+                      <p>{selectedEvent.resource.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className='modal-actions'>
+                  <h3>⚙️ Actions Rapides</h3>
+                  <div className='status-buttons-grid'>
+                    <button
+                      onClick={() =>
+                        updateStatus(selectedEvent.resource.id, 'confirmed')
+                      }
+                      className='status-btn status-btn-confirmed'
+                      disabled={selectedEvent.resource.status === 'confirmed'}
+                    >
+                      <span className='status-icon'>✅</span>
+                      <span className='status-text'>Confirmer</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateStatus(selectedEvent.resource.id, 'completed')
+                      }
+                      className='status-btn status-btn-completed'
+                      disabled={selectedEvent.resource.status === 'completed'}
+                    >
+                      <span className='status-icon'>🎉</span>
+                      <span className='status-text'>Terminé</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateStatus(selectedEvent.resource.id, 'no_show')
+                      }
+                      className='status-btn status-btn-no-show'
+                      disabled={selectedEvent.resource.status === 'no_show'}
+                    >
+                      <span className='status-icon'>🚫</span>
+                      <span className='status-text'>Absent</span>
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateStatus(selectedEvent.resource.id, 'cancelled')
+                      }
+                      className='status-btn status-btn-cancelled'
+                      disabled={selectedEvent.resource.status === 'cancelled'}
+                    >
+                      <span className='status-icon'>❌</span>
+                      <span className='status-text'>Annuler</span>
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: '1.5rem',
+                      paddingTop: '1.5rem',
+                      borderTop: '1px solid #e5e7eb',
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        setAppointmentToDelete(selectedEvent.resource.id);
+                        setShowDeleteModal(true);
+                      }}
+                      className='btn-delete-appointment'
+                    >
+                      <span>🗑️</span>
+                      <span>Supprimer le RDV</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal de suppression */}
+          {showDeleteModal && appointmentToDelete && (
+            <DeleteConfirmModal
+              show={showDeleteModal}
+              title='Supprimer ce rendez-vous'
+              message='Êtes-vous sûr de vouloir supprimer ce rendez-vous ? Le créneau sera libéré et redeviendra disponible.'
+              itemName={
+                selectedEvent
+                  ? `${selectedEvent.resource.customerName} - ${selectedEvent.resource.time}`
+                  : 'Rendez-vous'
+              }
+              onConfirm={handleDeleteAppointment}
+              onCancel={() => {
+                setShowDeleteModal(false);
+                setAppointmentToDelete(null);
+              }}
+            />
+          )}
+
+          {/* Modal de création de RDV */}
+          {showCreateModal && selectedDate && (
+            <div
+              className='modal-overlay'
+              onClick={() => {
+                setShowCreateModal(false);
+                setFormError('');
+              }}
+            >
+              <div
+                className='modal-content create-modal'
+                onClick={e => e.stopPropagation()}
+              >
+                <div className='modal-header'>
+                  <h2>➕ Nouveau Rendez-vous</h2>
+                  <button
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setFormError('');
+                    }}
+                    className='close-btn'
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={handleCreateAppointment} className='modal-body'>
+                  <p className='selected-date-info'>
+                    📅{' '}
+                    {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                  </p>
+
+                  {formError && (
+                    <div className='error-message'>❌ {formError}</div>
+                  )}
+
+                  <div className='source-selection'>
+                    <h3>📞 Source du rendez-vous *</h3>
+                    <div className='source-buttons'>
+                      <button
+                        type='button'
+                        className={`source-btn phone ${formData.source === 'phone' ? 'active' : ''}`}
+                        onClick={() =>
+                          setFormData({ ...formData, source: 'phone' })
+                        }
+                      >
+                        📞 Par téléphone
+                      </button>
+                      <button
+                        type='button'
+                        className={`source-btn center ${formData.source === 'center' ? 'active' : ''}`}
+                        onClick={() =>
+                          setFormData({ ...formData, source: 'center' })
+                        }
+                      >
+                        🏢 Au centre
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className='form-section'>
+                    <h3>👤 Informations client</h3>
+                    <div className='form-row'>
+                      <div className='form-group'>
+                        <label>Prénom *</label>
+                        <input
+                          type='text'
+                          value={formData.firstName}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              firstName: e.target.value,
+                            })
+                          }
+                          required
+                          placeholder='Jean'
+                        />
+                      </div>
+                      <div className='form-group'>
+                        <label>Nom *</label>
+                        <input
+                          type='text'
+                          value={formData.lastName}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              lastName: e.target.value,
+                            })
+                          }
+                          required
+                          placeholder='Dupont'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='form-row'>
+                      <div className='form-group'>
+                        <label>Email *</label>
+                        <input
+                          type='email'
+                          value={formData.email}
+                          onChange={e =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
+                          required
+                          placeholder='jean.dupont@email.com'
+                        />
+                      </div>
+                      <div className='form-group'>
+                        <label>Téléphone *</label>
+                        <input
+                          type='tel'
+                          value={formData.phone}
+                          onChange={e =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
+                          required
+                          placeholder='06 12 34 56 78'
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='form-section'>
+                    <h3>🚗 Véhicule</h3>
+                    <div className='form-group'>
+                      <label>Type de véhicule *</label>
+                      <select
+                        value={formData.vehicleType}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            vehicleType: e.target.value,
+                          })
+                        }
+                        required
+                      >
+                        <option value=''>Sélectionnez un type</option>
+                        <option value='Voiture'>Voiture</option>
+                        <option value='Moto'>Moto</option>
+                        <option value='Quad'>Quad</option>
+                        <option value='Scooter'>Scooter</option>
+                        <option value='Utilitaire léger'>
+                          Utilitaire léger
+                        </option>
+                      </select>
+                    </div>
+
+                    <div className='form-row'>
+                      <div className='form-group'>
+                        <label>Marque *</label>
+                        <input
+                          type='text'
+                          value={formData.vehicleBrand}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              vehicleBrand: e.target.value,
+                            })
+                          }
+                          required
+                          placeholder='Peugeot'
+                        />
+                      </div>
+                      <div className='form-group'>
+                        <label>Modèle *</label>
+                        <input
+                          type='text'
+                          value={formData.vehicleModel}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              vehicleModel: e.target.value,
+                            })
+                          }
+                          required
+                          placeholder='208'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='form-row'>
+                      <div className='form-group'>
+                        <label>Immatriculation *</label>
+                        <input
+                          type='text'
+                          value={formData.licensePlate}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              licensePlate: e.target.value,
+                            })
+                          }
+                          required
+                          placeholder='AB-123-CD'
+                        />
+                      </div>
+                      <div className='form-group'>
+                        <label>Type de carburant *</label>
+                        <select
+                          value={formData.fuelType}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              fuelType: e.target.value,
+                            })
+                          }
+                          required
+                        >
+                          <option value=''>Sélectionnez</option>
+                          <option value='Essence'>Essence</option>
+                          <option value='Diesel'>Diesel</option>
+                          <option value='Hybride'>Hybride</option>
+                          <option value='Électrique'>Électrique</option>
+                          <option value='GPL'>GPL</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='form-section'>
+                    <h3>📅 Date et heure *</h3>
+                    <div className='form-group'>
+                      <input
+                        type='datetime-local'
+                        value={formData.appointmentDate}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            appointmentDate: e.target.value,
+                          })
+                        }
+                        required
+                        min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                      />
+                    </div>
+                  </div>
+
+                  <div className='form-section'>
+                    <h3>📝 Notes (optionnel)</h3>
+                    <div className='form-group'>
+                      <textarea
+                        value={formData.notes}
+                        onChange={e =>
+                          setFormData({ ...formData, notes: e.target.value })
+                        }
+                        placeholder='Informations supplémentaires...'
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className='modal-actions'>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setShowCreateModal(false);
+                        setFormError('');
+                      }}
+                      className='btn-secondary'
+                      disabled={formLoading}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type='submit'
+                      className='btn-primary'
+                      disabled={formLoading || !formData.source}
+                    >
+                      {formLoading ? '⏳ Création...' : '✅ Créer le RDV'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

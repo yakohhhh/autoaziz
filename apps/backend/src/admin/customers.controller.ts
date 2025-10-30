@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Query, Patch, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  Patch,
+  Body,
+} from '@nestjs/common';
 import { CustomersService } from './customers.service';
 
 @Controller('admin/customers')
@@ -8,6 +17,23 @@ export class CustomersController {
   @Get()
   async getAllCustomers() {
     return this.customersService.getAllCustomers();
+  }
+
+  @Post()
+  async createCustomer(
+    @Body()
+    createCustomerDto: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      notes?: string;
+      vehicleBrand?: string;
+      vehicleModel?: string;
+      licensePlate?: string;
+    }
+  ) {
+    return this.customersService.createCustomer(createCustomerDto);
   }
 
   @Get('search')
@@ -26,5 +52,20 @@ export class CustomersController {
     @Body('notes') notes: string
   ) {
     return this.customersService.updateCustomerNotes(parseInt(id), notes);
+  }
+
+  @Delete(':id')
+  async deleteCustomer(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Body('note') note?: string,
+    @Body('deletedBy') deletedBy?: string
+  ) {
+    return this.customersService.deleteCustomer(
+      parseInt(id),
+      reason,
+      note,
+      deletedBy
+    );
   }
 }
