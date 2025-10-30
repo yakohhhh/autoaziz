@@ -210,6 +210,75 @@ export class CustomersService {
     }));
   }
 
+  async searchCustomersByName(firstName?: string, lastName?: string) {
+    if (!firstName && !lastName) {
+      return [];
+    }
+
+    const where: any = {};
+    const conditions: any[] = [];
+
+    if (firstName) {
+      conditions.push({
+        firstName: { contains: firstName, mode: 'insensitive' },
+      });
+    }
+
+    if (lastName) {
+      conditions.push({
+        lastName: { contains: lastName, mode: 'insensitive' },
+      });
+    }
+
+    // Chercher les clients qui matchent le prénom OU le nom (ou les deux)
+    if (conditions.length > 0) {
+      where.OR = conditions;
+    }
+
+    const customers = await this.prisma.customer.findMany({
+      where,
+      include: {
+        vehicles: true,
+        appointments: {
+          where: {
+            deletedAt: null,
+          },
+          orderBy: { appointmentDate: 'desc' },
+          take: 5, // Limiter aux 5 derniers RDV
+        },
+        _count: {
+          select: { appointments: true },
+        },
+      },
+      take: 10, // Max 10 suggestions
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return customers.map(customer => ({
+      id: customer.id,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      fullName: `${customer.firstName} ${customer.lastName}`,
+      email: customer.email,
+      phone: customer.phone,
+      vehicles: customer.vehicles.map(v => ({
+        id: v.id,
+        licensePlate: v.licensePlate,
+        vehicleType: v.vehicleType,
+        vehicleBrand: v.vehicleBrand,
+        vehicleModel: v.vehicleModel,
+        fuelType: v.fuelType,
+      })),
+      lastAppointments: customer.appointments.map(apt => ({
+        id: apt.id,
+        date: apt.appointmentDate,
+        time: apt.appointmentTime,
+        status: apt.status,
+      })),
+      totalAppointments: customer._count.appointments,
+    }));
+  }
+
   async updateCustomerNotes(id: number, notes: string) {
     const customer = await this.prisma.customer.update({
       where: { id },
@@ -300,6 +369,93 @@ export class CustomersService {
       customerName: `${customer.firstName} ${customer.lastName}`,
       appointmentsFreed: customer.appointments.length,
       vehiclesDeleted: customer.vehicles.length,
+    };
+  }
+
+  async updateCustomer(
+    id: number,
+    updateData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      notes?: string;
+    }
+  ) {
+    const customer = await this.prisma.customer.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return {
+      success: true,
+      message: 'Client mis à jour avec succès',
+      customer: {
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        fullName: `${customer.firstName} ${customer.lastName}`,
+        email: customer.email,
+        phone: customer.phone,
+        notes: customer.notes,
+      },
+    };
+  }
+
+  async addVehicle(
+    customerId: number,
+    vehicleData: {
+      licensePlate: string;
+      vehicleType: string;
+      vehicleBrand: string;
+      vehicleModel: string;
+      fuelType?: string;
+    }
+  ) {
+    const vehicle = await this.prisma.vehicle.create({
+      data: {
+        customerId,
+        ...vehicleData,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Véhicule ajouté avec succès',
+      vehicle,
+    };
+  }
+
+  async updateVehicle(
+    vehicleId: number,
+    vehicleData: {
+      licensePlate?: string;
+      vehicleType?: string;
+      vehicleBrand?: string;
+      vehicleModel?: string;
+      fuelType?: string;
+    }
+  ) {
+    const vehicle = await this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: vehicleData,
+    });
+
+    return {
+      success: true,
+      message: 'Véhicule mis à jour avec succès',
+      vehicle,
+    };
+  }
+
+  async deleteVehicle(vehicleId: number) {
+    await this.prisma.vehicle.delete({
+      where: { id: vehicleId },
+    });
+
+    return {
+      success: true,
+      message: 'Véhicule supprimé avec succès',
     };
   }
 

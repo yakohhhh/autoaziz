@@ -283,6 +283,103 @@ export class CalendarService {
     };
   }
 
+  async updateAppointment(
+    id: number,
+    updateData: {
+      appointmentDate?: string;
+      selectedTime?: string;
+      notes?: string;
+      vehicleId?: number;
+      price?: number;
+    }
+  ) {
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id },
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(`Rendez-vous #${id} introuvable`);
+    }
+
+    const data: any = {};
+
+    // Mise à jour de la date si fournie
+    if (updateData.appointmentDate) {
+      const newDate = new Date(updateData.appointmentDate);
+      data.appointmentDate = new Date(newDate.toDateString());
+    }
+
+    // Mise à jour de l'heure si fournie
+    if (updateData.selectedTime) {
+      data.appointmentTime = updateData.selectedTime;
+    }
+
+    // Mise à jour des notes si fournies
+    if (updateData.notes !== undefined) {
+      data.notes = updateData.notes;
+    }
+
+    // Mise à jour du prix si fourni
+    if (updateData.price !== undefined) {
+      data.price = updateData.price;
+    }
+
+    // Mise à jour du véhicule si fourni
+    if (updateData.vehicleId !== undefined) {
+      // Vérifier que le véhicule existe
+      const vehicle = await this.prisma.vehicle.findUnique({
+        where: { id: updateData.vehicleId },
+      });
+
+      if (!vehicle) {
+        throw new NotFoundException(
+          `Véhicule #${updateData.vehicleId} introuvable`
+        );
+      }
+
+      data.vehicleId = updateData.vehicleId;
+      // Mettre à jour aussi les champs dénormalisés du véhicule
+      data.vehicleRegistration = vehicle.licensePlate;
+      data.vehicleType = vehicle.vehicleType;
+      data.vehicleBrand = vehicle.vehicleBrand;
+      data.vehicleModel = vehicle.vehicleModel;
+      data.fuelType = vehicle.fuelType;
+    }
+
+    // Si on change la date ou l'heure, vérifier que le nouveau créneau est disponible
+    if (data.appointmentDate || data.appointmentTime) {
+      const checkDate = data.appointmentDate || appointment.appointmentDate;
+      const checkTime = data.appointmentTime || appointment.appointmentTime;
+
+      const conflictingAppointment = await this.prisma.appointment.findFirst({
+        where: {
+          appointmentDate: checkDate,
+          appointmentTime: checkTime,
+          status: { notIn: ['cancelled'] },
+          deletedAt: null,
+          id: { not: id }, // Exclure le rendez-vous actuel
+        },
+      });
+
+      if (conflictingAppointment) {
+        throw new BadRequestException(
+          `Le créneau ${checkTime} du ${checkDate.toLocaleDateString('fr-FR')} est déjà réservé`
+        );
+      }
+    }
+
+    const updated = await this.prisma.appointment.update({
+      where: { id },
+      data,
+    });
+
+    return {
+      success: true,
+      message: 'Rendez-vous mis à jour avec succès',
+      appointment: updated,
+    };
+  }
+
   async deleteAppointment(
     id: number,
     reason: string,

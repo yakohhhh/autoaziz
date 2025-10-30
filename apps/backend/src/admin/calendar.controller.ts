@@ -32,6 +32,21 @@ export class CalendarController {
     return this.calendarService.updateAppointmentStatus(parseInt(id), status);
   }
 
+  @Patch('appointments/:id')
+  async updateAppointment(
+    @Param('id') id: string,
+    @Body()
+    updateData: {
+      appointmentDate?: string;
+      selectedTime?: string;
+      notes?: string;
+      vehicleId?: number;
+      price?: number;
+    }
+  ) {
+    return this.calendarService.updateAppointment(parseInt(id), updateData);
+  }
+
   @Delete('appointments/:id')
   async deleteAppointment(
     @Param('id') id: string,

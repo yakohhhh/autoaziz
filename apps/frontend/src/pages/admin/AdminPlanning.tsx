@@ -163,7 +163,7 @@ const AdminPlanning: React.FC = () => {
 
       // Déclencher un événement pour mettre à jour les stats dans la page Clients
       localStorage.setItem('appointment_status_changed', Date.now().toString());
-      
+
       // Recharger les rendez-vous
       await loadAppointments();
       setShowModal(false);
@@ -199,10 +199,10 @@ const AdminPlanning: React.FC = () => {
         setAppointmentToDelete(null);
         setShowModal(false);
         setSelectedEvent(null);
-        
+
         // Recharger les rendez-vous
         await loadAppointments();
-        
+
         alert(
           '✅ Rendez-vous supprimé ! Le créneau est maintenant disponible.'
         );

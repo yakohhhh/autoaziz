@@ -41,6 +41,14 @@ export class CustomersController {
     return this.customersService.searchCustomers(query);
   }
 
+  @Get('search-by-name')
+  async searchCustomersByName(
+    @Query('firstName') firstName?: string,
+    @Query('lastName') lastName?: string
+  ) {
+    return this.customersService.searchCustomersByName(firstName, lastName);
+  }
+
   @Get(':id')
   async getCustomerById(@Param('id') id: string) {
     return this.customersService.getCustomerById(parseInt(id));
@@ -52,6 +60,63 @@ export class CustomersController {
     @Body('notes') notes: string
   ) {
     return this.customersService.updateCustomerNotes(parseInt(id), notes);
+  }
+
+  @Patch(':id')
+  async updateCustomer(
+    @Param('id') id: string,
+    @Body()
+    updateData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      notes?: string;
+    }
+  ) {
+    return this.customersService.updateCustomer(parseInt(id), updateData);
+  }
+
+  @Post(':id/vehicles')
+  async addVehicle(
+    @Param('id') customerId: string,
+    @Body()
+    vehicleData: {
+      licensePlate: string;
+      vehicleType: string;
+      vehicleBrand: string;
+      vehicleModel: string;
+      fuelType?: string;
+    }
+  ) {
+    return this.customersService.addVehicle(parseInt(customerId), vehicleData);
+  }
+
+  @Patch(':customerId/vehicles/:vehicleId')
+  async updateVehicle(
+    @Param('customerId') customerId: string,
+    @Param('vehicleId') vehicleId: string,
+    @Body()
+    vehicleData: {
+      licensePlate?: string;
+      vehicleType?: string;
+      vehicleBrand?: string;
+      vehicleModel?: string;
+      fuelType?: string;
+    }
+  ) {
+    return this.customersService.updateVehicle(
+      parseInt(vehicleId),
+      vehicleData
+    );
+  }
+
+  @Delete(':customerId/vehicles/:vehicleId')
+  async deleteVehicle(
+    @Param('customerId') customerId: string,
+    @Param('vehicleId') vehicleId: string
+  ) {
+    return this.customersService.deleteVehicle(parseInt(vehicleId));
   }
 
   @Delete(':id')
