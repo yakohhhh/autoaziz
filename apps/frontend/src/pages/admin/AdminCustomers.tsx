@@ -91,6 +91,420 @@ const NotesEditor: React.FC<{
   );
 };
 
+// Modal de modification client
+const EditCustomerModal: React.FC<{
+  customer: Customer;
+  onClose: () => void;
+  onSave: () => void;
+}> = ({ customer, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    email: customer.email,
+    phone: customer.phone,
+    notes: customer.notes || '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/customers/${customer.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        alert('✅ Client modifié avec succès');
+        onSave();
+        onClose();
+      } else {
+        alert('❌ Erreur lors de la modification');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de la modification');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className='modal-overlay' onClick={onClose}>
+      <div className='modal-content' onClick={e => e.stopPropagation()}>
+        <h2>✏️ Modifier le Client</h2>
+        <form onSubmit={handleSubmit}>
+          <div className='form-group'>
+            <label>Prénom *</label>
+            <input
+              type='text'
+              value={formData.firstName}
+              onChange={e =>
+                setFormData({ ...formData, firstName: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Nom *</label>
+            <input
+              type='text'
+              value={formData.lastName}
+              onChange={e =>
+                setFormData({ ...formData, lastName: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Email *</label>
+            <input
+              type='email'
+              value={formData.email}
+              onChange={e =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Téléphone *</label>
+            <input
+              type='tel'
+              value={formData.phone}
+              onChange={e =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Notes</label>
+            <textarea
+              value={formData.notes}
+              onChange={e =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
+              rows={4}
+              placeholder='Notes sur le client...'
+            />
+          </div>
+
+          <div className='modal-actions'>
+            <button
+              type='button'
+              onClick={onClose}
+              className='btn-cancel'
+              disabled={saving}
+            >
+              Annuler
+            </button>
+            <button type='submit' className='btn-save' disabled={saving}>
+              {saving ? '⏳ Sauvegarde...' : '✅ Enregistrer'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Modal d'ajout de véhicule
+const AddVehicleModal: React.FC<{
+  customerId: number;
+  onClose: () => void;
+  onSave: () => void;
+}> = ({ customerId, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    licensePlate: '',
+    vehicleType: 'Voiture',
+    vehicleBrand: '',
+    vehicleModel: '',
+    fuelType: 'Essence',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/customers/${customerId}/vehicles`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        alert('✅ Véhicule ajouté avec succès');
+        onSave();
+        onClose();
+      } else {
+        alert('❌ Erreur lors de l\'ajout');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de l\'ajout');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className='modal-overlay' onClick={onClose}>
+      <div className='modal-content' onClick={e => e.stopPropagation()}>
+        <h2>🚗 Ajouter un Véhicule</h2>
+        <form onSubmit={handleSubmit}>
+          <div className='form-group'>
+            <label>Immatriculation *</label>
+            <input
+              type='text'
+              value={formData.licensePlate}
+              onChange={e =>
+                setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })
+              }
+              placeholder='AB-123-CD'
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Type de véhicule *</label>
+            <select
+              value={formData.vehicleType}
+              onChange={e =>
+                setFormData({ ...formData, vehicleType: e.target.value })
+              }
+            >
+              <option value='Voiture'>Voiture</option>
+              <option value='Moto'>Moto</option>
+              <option value='Utilitaire'>Utilitaire</option>
+              <option value='4x4/SUV'>4x4/SUV</option>
+            </select>
+          </div>
+
+          <div className='form-group'>
+            <label>Marque *</label>
+            <input
+              type='text'
+              value={formData.vehicleBrand}
+              onChange={e =>
+                setFormData({ ...formData, vehicleBrand: e.target.value })
+              }
+              placeholder='Renault, Peugeot...'
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Modèle *</label>
+            <input
+              type='text'
+              value={formData.vehicleModel}
+              onChange={e =>
+                setFormData({ ...formData, vehicleModel: e.target.value })
+              }
+              placeholder='Clio, 308...'
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Carburant</label>
+            <select
+              value={formData.fuelType}
+              onChange={e =>
+                setFormData({ ...formData, fuelType: e.target.value })
+              }
+            >
+              <option value='Essence'>Essence</option>
+              <option value='Diesel'>Diesel</option>
+              <option value='Électrique'>Électrique</option>
+              <option value='Hybride'>Hybride</option>
+              <option value='GPL'>GPL</option>
+            </select>
+          </div>
+
+          <div className='modal-actions'>
+            <button
+              type='button'
+              onClick={onClose}
+              className='btn-cancel'
+              disabled={saving}
+            >
+              Annuler
+            </button>
+            <button type='submit' className='btn-save' disabled={saving}>
+              {saving ? '⏳ Ajout...' : '✅ Ajouter'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Modal de modification de véhicule
+const EditVehicleModal: React.FC<{
+  customerId: number;
+  vehicle: Vehicle;
+  onClose: () => void;
+  onSave: () => void;
+}> = ({ customerId, vehicle, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    licensePlate: vehicle.licensePlate,
+    vehicleType: vehicle.vehicleType,
+    vehicleBrand: vehicle.vehicleBrand,
+    vehicleModel: vehicle.vehicleModel,
+    fuelType: vehicle.fuelType || 'Essence',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/customers/${customerId}/vehicles/${vehicle.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        alert('✅ Véhicule modifié avec succès');
+        onSave();
+        onClose();
+      } else {
+        alert('❌ Erreur lors de la modification');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de la modification');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className='modal-overlay' onClick={onClose}>
+      <div className='modal-content' onClick={e => e.stopPropagation()}>
+        <h2>✏️ Modifier le Véhicule</h2>
+        <form onSubmit={handleSubmit}>
+          <div className='form-group'>
+            <label>Immatriculation *</label>
+            <input
+              type='text'
+              value={formData.licensePlate}
+              onChange={e =>
+                setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Type de véhicule *</label>
+            <select
+              value={formData.vehicleType}
+              onChange={e =>
+                setFormData({ ...formData, vehicleType: e.target.value })
+              }
+            >
+              <option value='Voiture'>Voiture</option>
+              <option value='Moto'>Moto</option>
+              <option value='Utilitaire'>Utilitaire</option>
+              <option value='4x4/SUV'>4x4/SUV</option>
+            </select>
+          </div>
+
+          <div className='form-group'>
+            <label>Marque *</label>
+            <input
+              type='text'
+              value={formData.vehicleBrand}
+              onChange={e =>
+                setFormData({ ...formData, vehicleBrand: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Modèle *</label>
+            <input
+              type='text'
+              value={formData.vehicleModel}
+              onChange={e =>
+                setFormData({ ...formData, vehicleModel: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className='form-group'>
+            <label>Carburant</label>
+            <select
+              value={formData.fuelType}
+              onChange={e =>
+                setFormData({ ...formData, fuelType: e.target.value })
+              }
+            >
+              <option value='Essence'>Essence</option>
+              <option value='Diesel'>Diesel</option>
+              <option value='Électrique'>Électrique</option>
+              <option value='Hybride'>Hybride</option>
+              <option value='GPL'>GPL</option>
+            </select>
+          </div>
+
+          <div className='modal-actions'>
+            <button
+              type='button'
+              onClick={onClose}
+              className='btn-cancel'
+              disabled={saving}
+            >
+              Annuler
+            </button>
+            <button type='submit' className='btn-save' disabled={saving}>
+              {saving ? '⏳ Sauvegarde...' : '✅ Enregistrer'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 interface Vehicle {
   id: number;
   licensePlate: string;
@@ -145,6 +559,14 @@ const AdminCustomers: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<number | null>(null);
+  
+  // États pour les nouveaux modals
+  const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
+  const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
+  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
+  const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
+  const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
+  
   const [newCustomer, setNewCustomer] = useState({
     firstName: '',
     lastName: '',
@@ -270,6 +692,33 @@ const AdminCustomers: React.FC = () => {
         setCustomerToDelete(null);
         setSelectedCustomer(null);
         loadCustomers();
+      } else {
+        alert('❌ Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de la suppression');
+    }
+  };
+
+  const handleDeleteVehicle = async (vehicleId: number) => {
+    if (!selectedCustomer) return;
+    
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(
+        `http://localhost:3001/admin/customers/${selectedCustomer.id}/vehicles/${vehicleId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        alert('✅ Véhicule supprimé avec succès');
+        loadCustomerDetails(selectedCustomer.id);
       } else {
         alert('❌ Erreur lors de la suppression');
       }
@@ -469,6 +918,21 @@ const AdminCustomers: React.FC = () => {
                   {/* Informations principales */}
                   <div className='profile-info'>
                     <h2>{selectedCustomer.fullName}</h2>
+                    <button
+                      className='btn-edit-customer'
+                      onClick={() => setShowEditCustomerModal(true)}
+                      style={{
+                        marginBottom: '1rem',
+                        padding: '0.5rem 1rem',
+                        background: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✏️ Modifier les informations
+                    </button>
                     <div className='info-grid'>
                       <div className='info-row'>
                         <span className='info-label'>Actions</span>
@@ -670,9 +1134,25 @@ const AdminCustomers: React.FC = () => {
 
                   {/* Véhicules */}
                   <div className='vehicles-section'>
-                    <h3>
-                      🚗 Véhicules ({selectedCustomer.vehicles?.length || 0})
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h3>
+                        🚗 Véhicules ({selectedCustomer.vehicles?.length || 0})
+                      </h3>
+                      <button
+                        onClick={() => setShowAddVehicleModal(true)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        ➕ Ajouter un véhicule
+                      </button>
+                    </div>
                     {selectedCustomer.vehicles &&
                     selectedCustomer.vehicles.length > 0 ? (
                       <div className='vehicles-list-detail'>
@@ -766,6 +1246,45 @@ const AdminCustomers: React.FC = () => {
                                           : '⏳'}
                                   </div>
                                 )}
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                                <button
+                                  onClick={() => {
+                                    setVehicleToEdit(vehicle);
+                                    setShowEditVehicleModal(true);
+                                  }}
+                                  style={{
+                                    flex: 1,
+                                    padding: '0.4rem',
+                                    background: '#2196F3',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                  }}
+                                >
+                                  ✏️ Modifier
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le véhicule ${vehicle.licensePlate} ?`)) {
+                                      handleDeleteVehicle(vehicle.id);
+                                    }
+                                  }}
+                                  style={{
+                                    flex: 1,
+                                    padding: '0.4rem',
+                                    background: '#f44336',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                  }}
+                                >
+                                  🗑️ Supprimer
+                                </button>
                               </div>
                             </div>
                           );
@@ -1115,6 +1634,46 @@ const AdminCustomers: React.FC = () => {
           itemName={`${selectedCustomer.fullName} (${selectedCustomer.email})`}
           onConfirm={handleDeleteCustomer}
           onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+
+      {/* Modal de modification client */}
+      {showEditCustomerModal && selectedCustomer && (
+        <EditCustomerModal
+          customer={selectedCustomer}
+          onClose={() => setShowEditCustomerModal(false)}
+          onSave={() => {
+            loadCustomers();
+            if (selectedCustomer) {
+              loadCustomerDetails(selectedCustomer.id);
+            }
+          }}
+        />
+      )}
+
+      {/* Modal d'ajout de véhicule */}
+      {showAddVehicleModal && selectedCustomer && (
+        <AddVehicleModal
+          customerId={selectedCustomer.id}
+          onClose={() => setShowAddVehicleModal(false)}
+          onSave={() => {
+            loadCustomerDetails(selectedCustomer.id);
+          }}
+        />
+      )}
+
+      {/* Modal de modification de véhicule */}
+      {showEditVehicleModal && vehicleToEdit && selectedCustomer && (
+        <EditVehicleModal
+          customerId={selectedCustomer.id}
+          vehicle={vehicleToEdit}
+          onClose={() => {
+            setShowEditVehicleModal(false);
+            setVehicleToEdit(null);
+          }}
+          onSave={() => {
+            loadCustomerDetails(selectedCustomer.id);
+          }}
         />
       )}
     </div>
