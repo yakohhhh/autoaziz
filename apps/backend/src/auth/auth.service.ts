@@ -15,6 +15,15 @@ export class AuthService {
   login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
+    console.log('Login attempt:', {
+      email,
+      passwordLength: password?.length,
+      expectedEmail: 'admin@autosur.com',
+      expectedPass: 'admin123',
+      matchEmail: email === 'admin@autosur.com',
+      matchPass: password === 'admin123',
+    });
+
     // TODO: Remplacer par une vraie validation en base de données
     // const user = await this.prisma.user.findUnique({
     //   where: { email },

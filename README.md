@@ -9,6 +9,7 @@ autoaziz/
 ├── apps/                    # Applications principales
 │   ├── backend/            # API NestJS
 │   ├── frontend/           # Interface React ⭐ Architecture restructurée !
+│   ├── mobile/             # 📱 Application Mobile Ionic React (NOUVEAU!)
 │   └── database/           # Configuration PostgreSQL
 ├── docs/                   # Documentation complète
 │   ├── NEW_ARCHITECTURE.md      # 📘 Documentation de la nouvelle architecture
@@ -43,6 +44,19 @@ Le script s'occupe de tout :
 **Accès direct :** http://localhost:3000/login
 - **Email:** `admin@autosur.com`
 - **Password:** `admin123`
+
+### 📱 Application Mobile (NOUVEAU!)
+
+```bash
+# Lancer l'application mobile Ionic React
+./launch-mobile.sh
+```
+
+**Accès mobile :** http://localhost:8100
+
+> 📱 **Application réservée au patron** pour gérer planning, rendez-vous, clients et statistiques  
+> 🎨 **Design 100% identique au web** - Même direction artistique  
+> 📖 **Documentation complète** : [mobile/GUIDE.md](mobile/GUIDE.md)
 
 ### Pour arrêter tous les services
 
@@ -121,6 +135,27 @@ npm start
 - **Vérification** temps réel des codes
 
 > 📖 **Documentation détaillée** : [NEW_ARCHITECTURE.md](docs/NEW_ARCHITECTURE.md)
+
+### 📱 Mobile (Ionic React) 🆕
+- **Localisation** : `apps/mobile/`  
+- **Application native** iOS et Android
+- **Progressive Web App** (PWA)
+- **Design 100% identique au web**
+  - Mêmes couleurs (#667eea, #c174f2)
+  - Mêmes gradients et style
+  - Interface responsive et moderne
+- **Fonctionnalités**
+  - 📊 Tableau de bord avec statistiques temps réel
+  - 📅 Planning et gestion des rendez-vous
+  - ➕ Ajout rapide de RDV avec formulaire complet
+  - 👥 Liste des clients avec recherche avancée
+  - 📈 Graphiques interactifs (Recharts)
+  - 🔍 Recherche et filtres puissants
+  - ↻ Pull-to-refresh
+  - 📱 Navigation par onglets (bottom tabs)
+
+> 📖 **Documentation mobile** : [mobile/GUIDE.md](mobile/GUIDE.md)  
+> 🚀 **Lancement** : `./launch-mobile.sh`
 
 ## 🛠️ Scripts disponibles
 
