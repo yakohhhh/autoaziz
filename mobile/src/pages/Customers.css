@@ -1,24 +1,39 @@
 /* Premium Customers Page Theme */
 .customers-page-content {
-  --background: #f8fafc; /* Very light blue-grey background */
+  --background: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Header Styling */
+.customers-header ion-toolbar {
+  --background: rgba(255, 255, 255, 0.8);
+  --border-width: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
 }
 
 .toolbar-title {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 8px 0;
 }
 
 .toolbar-title .logo {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: 1px;
 }
 
 .toolbar-title .subtitle {
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: 12px;
   font-weight: 500;
+  color: #64748b;
   margin-top: 2px;
 }
 
@@ -33,10 +48,10 @@
 
 .stat-mini {
   margin: 0;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   background: white;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: none;
   overflow: visible;
 }
 
@@ -48,9 +63,9 @@
 .stat-mini-value {
   font-size: 24px;
   font-weight: 800;
-  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   background-clip: text;
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 4px;
 }
@@ -77,20 +92,17 @@
 /* Premium Customer Card */
 .customer-card-premium {
   position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.02),
-    0 20px 25px -5px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
 }
 
 .customer-card-premium:active {
-  transform: scale(0.995);
+  transform: scale(0.98);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Accent Bar */

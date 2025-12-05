@@ -63,19 +63,38 @@ export class SlotsService {
     const today = now.startOf('day');
     const startOfWeek = this.getStartOfWeek(today, weekOffset);
     const endOfWeek = startOfWeek.add(6, 'day');
+
     const appointments = await this.prisma.appointment.findMany({
       where: {
         appointmentDate: {
           gte: startOfWeek.toDate(),
           lte: endOfWeek.toDate(),
         },
+        status: { not: 'cancelled' }, // Exclure les rendez-vous annulés
         deletedAt: null, // Exclure les rendez-vous supprimés
       },
     });
+
+    // Récupérer les créneaux bloqués pour la semaine
+    const blockedSlots = await this.prisma.blockedSlot.findMany({
+      where: {
+        date: {
+          gte: startOfWeek.toDate(),
+          lte: endOfWeek.toDate(),
+        },
+        deletedAt: null,
+      },
+    });
+
     const days: DaySlots[] = [];
     for (let i = 0; i < 7; i++) {
       const currentDate = startOfWeek.add(i, 'day');
-      const daySlots = this.generateDaySlots(currentDate, now, appointments);
+      const daySlots = this.generateDaySlots(
+        currentDate,
+        now,
+        appointments,
+        blockedSlots
+      );
       days.push(daySlots);
     }
     return {
@@ -88,7 +107,8 @@ export class SlotsService {
   private generateDaySlots(
     date: dayjs.Dayjs,
     now: dayjs.Dayjs,
-    appointments: any[]
+    appointments: any[],
+    blockedSlots: any[]
   ): DaySlots {
     const today = now.startOf('day');
     const dateString = date.format('YYYY-MM-DD');
@@ -101,6 +121,20 @@ export class SlotsService {
     } else {
       availableHours = this.OPENING_HOURS.weekday;
     }
+
+    // Créer un Set des créneaux bloqués pour ce jour
+    const blockedTimesForDay = new Set(
+      blockedSlots
+        .filter(slot => {
+          const slotDate = dayjs(slot.date as Date)
+            .tz(this.TIMEZONE)
+            .startOf('day');
+          const currentDateDay = date.startOf('day');
+          return slotDate.isSame(currentDateDay, 'day');
+        })
+        .map(slot => slot.time)
+    );
+
     const reservationsBySlot = new Map<string, number>();
     appointments
       .filter(apt => {
@@ -115,6 +149,15 @@ export class SlotsService {
     const isToday = date.isSame(today, 'day');
     const slots: TimeSlot[] = availableHours
       .map(time => {
+        // Si le créneau est bloqué, il n'est pas disponible
+        if (blockedTimesForDay.has(time)) {
+          return {
+            time,
+            available: false,
+            reserved: false,
+          };
+        }
+
         const reservationCount = reservationsBySlot.get(time) || 0;
         const isAvailable = reservationCount < this.CAPACITY_PER_SLOT;
         if (isToday) {
@@ -171,11 +214,30 @@ export class SlotsService {
         message: "Cet horaire n'est pas disponible.",
       };
     }
+
+    // Vérifier si le créneau est bloqué
+    const appointmentDateOnly = appointmentDateTime.startOf('day').toDate();
+    const blockedSlot = await this.prisma.blockedSlot.findFirst({
+      where: {
+        date: appointmentDateOnly,
+        time: time,
+        deletedAt: null,
+      },
+    });
+
+    if (blockedSlot) {
+      return {
+        valid: false,
+        message: 'Ce créneau est actuellement indisponible.',
+      };
+    }
+
     const appointmentDate = appointmentDateTime.toDate();
     const existingAppointments = await this.prisma.appointment.count({
       where: {
         appointmentDate: appointmentDate,
         appointmentTime: time,
+        status: { not: 'cancelled' }, // Exclure les rendez-vous annulés
         deletedAt: null, // Exclure les rendez-vous supprimés
       },
     });

@@ -11,6 +11,11 @@ export class AdminController {
     return this.adminService.getDashboardStats();
   }
 
+  @Get('stats/dashboard')
+  async getDashboardStats(): Promise<DashboardStatsDto> {
+    return this.adminService.getDashboardStats();
+  }
+
   @Get('appointments/recent')
   async getRecentAppointments() {
     return this.adminService.getRecentAppointments();

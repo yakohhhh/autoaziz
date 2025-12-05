@@ -139,3 +139,18 @@ model CustomerDeletion {
   @@map("customer_deletions")
   @@index([deletedAt])
 }
+
+model BlockedSlot {
+  id          Int       @id @default(autoincrement())
+  date        DateTime  @db.Date
+  time        String
+  reason      String?
+  blockedBy   String    @default("admin") @map("blocked_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("blocked_slots")
+  @@unique([date, time])
+  @@index([date])
+  @@index([deletedAt])
+}

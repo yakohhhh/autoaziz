@@ -3,6 +3,7 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../utils/leafletFix';
+import { API_CONFIG } from '../../constants/app.constants';
 import './Contact.css';
 
 const Contact: React.FC = () => {
@@ -32,7 +33,7 @@ const Contact: React.FC = () => {
     setError('');
 
     try {
-      await axios.post('http://localhost:3001/contacts', formData);
+      await axios.post(`${API_CONFIG.BASE_URL}/contacts`, formData);
       setSubmitted(true);
       setFormData({
         name: '',

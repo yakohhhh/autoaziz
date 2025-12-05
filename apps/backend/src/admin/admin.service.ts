@@ -21,6 +21,9 @@ export class AdminService {
         status: { in: ['pending_verification', 'pending'] },
       },
     });
+    const confirmedAppointments = await this.prisma.appointment.count({
+      where: { status: 'confirmed' },
+    });
     const completedAppointments = await this.prisma.appointment.count({
       where: { status: 'completed' },
     });
@@ -58,6 +61,7 @@ export class AdminService {
     return {
       totalAppointments,
       pendingAppointments,
+      confirmedAppointments,
       completedAppointments,
       cancelledAppointments,
       revenue,

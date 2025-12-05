@@ -6,6 +6,7 @@ import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './AdminPlanning.css';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
+import { API_CONFIG } from '../../constants/app.constants';
 
 const locales = {
   fr: fr,
@@ -101,7 +102,7 @@ const AdminPlanning: React.FC = () => {
       if (!silent) setLoading(true);
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        'http://localhost:3001/admin/calendar/appointments',
+        `${API_CONFIG.BASE_URL}/admin/calendar/appointments`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -148,7 +149,7 @@ const AdminPlanning: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/calendar/appointments/${id}/status`,
+        `${API_CONFIG.BASE_URL}/admin/calendar/appointments/${id}/status`,
         {
           method: 'PATCH',
           headers: {
@@ -178,7 +179,7 @@ const AdminPlanning: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/calendar/appointments/${appointmentToDelete}`,
+        `${API_CONFIG.BASE_URL}/admin/calendar/appointments/${appointmentToDelete}`,
         {
           method: 'DELETE',
           headers: {
@@ -232,7 +233,7 @@ const AdminPlanning: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        'http://localhost:3001/admin/calendar/appointments/manual',
+        `${API_CONFIG.BASE_URL}/admin/calendar/appointments/manual`,
         {
           method: 'POST',
           headers: {

@@ -13,7 +13,6 @@ import { AdminModule } from './admin/admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // TypeORM SUPPRIMÉ - Prisma uniquement pour UNE SEULE base de données
     ContactsModule,
     AppointmentsModule,
     EmailModule,

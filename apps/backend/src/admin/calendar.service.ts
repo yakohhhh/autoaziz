@@ -8,6 +8,12 @@ import {
   CreateManualAppointmentDto,
   ManualAppointmentSource,
 } from '../dto/create-manual-appointment.dto';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Injectable()
 export class CalendarService {
@@ -58,33 +64,8 @@ export class CalendarService {
       },
     });
 
-    // Format pour react-big-calendar ou FullCalendar
-    return appointments.map(apt => {
-      const dateStr = apt.appointmentDate.toISOString().split('T')[0];
-      const startDate = new Date(`${dateStr}T${apt.appointmentTime}`);
-      const endDate = new Date(startDate);
-      endDate.setMinutes(endDate.getMinutes() + 30); // Durée de 30 minutes pour un contrôle technique
-
-      return {
-        id: apt.id,
-        title: `${apt.firstName} ${apt.lastName} - ${apt.vehicleType}`,
-        start: startDate,
-        end: endDate,
-        resource: {
-          id: apt.id,
-          customerName: `${apt.firstName} ${apt.lastName}`,
-          email: apt.email,
-          phone: apt.phone,
-          vehicleType: apt.vehicleType,
-          vehicleBrand: apt.vehicleBrand,
-          vehicleModel: apt.vehicleModel,
-          vehicleRegistration: apt.vehicleRegistration,
-          time: apt.appointmentTime,
-          status: apt.status,
-          notes: apt.notes,
-        },
-      };
-    });
+    // Retourner les données brutes pour le planning hebdomadaire
+    return appointments;
   }
 
   async updateAppointmentStatus(id: number, status: string) {
@@ -163,9 +144,11 @@ export class CalendarService {
   }
 
   async createManualAppointment(dto: CreateManualAppointmentDto) {
-    const appointmentDateTime = new Date(dto.appointmentDate);
-    const appointmentDate = new Date(appointmentDateTime.toDateString());
-    const appointmentTime = appointmentDateTime.toTimeString().slice(0, 5);
+    const TIMEZONE = 'Europe/Paris';
+    const appointmentDateTime = dayjs(dto.appointmentDate).tz(TIMEZONE);
+    const appointmentTime = appointmentDateTime.format('HH:mm');
+    // Create UTC midnight date for storage
+    const appointmentDate = new Date(appointmentDateTime.format('YYYY-MM-DD'));
 
     // Vérifier si le créneau est déjà pris
     const existingAppointment = await this.prisma.appointment.findFirst({
@@ -178,7 +161,7 @@ export class CalendarService {
 
     if (existingAppointment) {
       throw new BadRequestException(
-        `Le créneau ${appointmentTime} du ${appointmentDate.toLocaleDateString('fr-FR')} est déjà réservé`
+        `Le créneau ${appointmentTime} du ${appointmentDateTime.format('DD/MM/YYYY')} est déjà réservé`
       );
     }
 
@@ -286,9 +269,18 @@ export class CalendarService {
   async updateAppointment(
     id: number,
     updateData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      vehicleType?: string;
+      vehicleBrand?: string;
+      vehicleModel?: string;
+      vehicleRegistration?: string;
+      status?: string;
+      notes?: string;
       appointmentDate?: string;
       selectedTime?: string;
-      notes?: string;
       vehicleId?: number;
       price?: number;
     }
@@ -302,6 +294,25 @@ export class CalendarService {
     }
 
     const data: any = {};
+
+    // Mise à jour des informations client
+    if (updateData.firstName) data.firstName = updateData.firstName;
+    if (updateData.lastName) data.lastName = updateData.lastName;
+    if (updateData.email) data.email = updateData.email;
+    if (updateData.phone) data.phone = updateData.phone;
+
+    // Mise à jour des informations véhicule
+    if (updateData.vehicleType) data.vehicleType = updateData.vehicleType;
+    if (updateData.vehicleBrand) data.vehicleBrand = updateData.vehicleBrand;
+    if (updateData.vehicleModel) data.vehicleModel = updateData.vehicleModel;
+    if (updateData.vehicleRegistration)
+      data.vehicleRegistration = updateData.vehicleRegistration;
+
+    // Mise à jour du statut
+    if (updateData.status) {
+      data.status = updateData.status;
+      data.actualStatus = updateData.status; // Synchroniser actualStatus
+    }
 
     // Mise à jour de la date si fournie
     if (updateData.appointmentDate) {
@@ -440,6 +451,94 @@ export class CalendarService {
         date: appointment.appointmentDate,
         time: appointment.appointmentTime,
       },
+    };
+  }
+
+  async getBlockedSlots(start?: string, end?: string) {
+    const where: {
+      date?: { gte: Date; lte: Date };
+      deletedAt?: null;
+    } = {
+      deletedAt: null,
+    };
+
+    if (start && end) {
+      where.date = {
+        gte: new Date(start),
+        lte: new Date(end),
+      };
+    }
+
+    const blockedSlots = await this.prisma.blockedSlot.findMany({
+      where,
+      orderBy: [{ date: 'asc' }, { time: 'asc' }],
+      select: {
+        id: true,
+        date: true,
+        time: true,
+        reason: true,
+        blockedBy: true,
+        createdAt: true,
+      },
+    });
+
+    return blockedSlots.map(slot => ({
+      id: slot.id,
+      date: slot.date.toISOString().split('T')[0],
+      time: slot.time,
+      reason: slot.reason,
+      blockedBy: slot.blockedBy,
+      createdAt: slot.createdAt,
+    }));
+  }
+
+  async createBlockedSlots(
+    slots: Array<{ date: string; time: string }>,
+    reason?: string
+  ) {
+    const created: any[] = [];
+
+    for (const slot of slots) {
+      try {
+        const blockedSlot = await this.prisma.blockedSlot.create({
+          data: {
+            date: new Date(slot.date),
+            time: slot.time,
+            reason: reason || "Créneau bloqué par l'administrateur",
+            blockedBy: 'admin',
+          },
+        });
+        created.push(blockedSlot);
+      } catch {
+        // Si le créneau existe déjà, on continue
+        console.log(`Créneau ${slot.date} ${slot.time} déjà bloqué`);
+      }
+    }
+
+    return {
+      success: true,
+      message: `${created.length} créneau(x) bloqué(s) avec succès`,
+      blocked: created.length,
+    };
+  }
+
+  async deleteBlockedSlot(id: number) {
+    const slot = await this.prisma.blockedSlot.findUnique({
+      where: { id },
+    });
+
+    if (!slot) {
+      throw new NotFoundException(`Créneau bloqué #${id} introuvable`);
+    }
+
+    await this.prisma.blockedSlot.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    return {
+      success: true,
+      message: 'Créneau débloqué avec succès',
     };
   }
 

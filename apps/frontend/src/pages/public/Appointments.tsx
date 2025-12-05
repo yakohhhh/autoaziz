@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { WeeklyCalendar } from '../../components';
 import { VEHICLE_BRANDS, FUEL_TYPES } from '../../utils/vehicleData';
+import { API_CONFIG } from '../../constants/app.constants';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {
@@ -93,7 +94,7 @@ const Appointments: React.FC = () => {
       // Retirer vehicleBrandCustom du payload envoyé
       delete dataToSend.vehicleBrandCustom;
 
-      await axios.post('http://localhost:3001/appointments', dataToSend);
+      await axios.post(`${API_CONFIG.BASE_URL}/appointments`, dataToSend);
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {

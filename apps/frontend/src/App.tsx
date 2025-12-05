@@ -12,6 +12,8 @@ import {
   AdminPlanning,
   AdminCustomers,
 } from './pages';
+import AdminPlanningWeek from './pages/admin/AdminPlanningWeek';
+import AdminPlanningMobile from './pages/admin/AdminPlanningMobile';
 import './App.css';
 
 function App() {
@@ -85,6 +87,22 @@ function App() {
           />
           <Route
             path='/admin/planning'
+            element={
+              <ProtectedRoute>
+                <AdminPlanningWeek />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin/planning-mobile'
+            element={
+              <ProtectedRoute>
+                <AdminPlanningMobile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/admin/planning-old'
             element={
               <ProtectedRoute>
                 <AdminPlanning />

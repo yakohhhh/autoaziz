@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_CONFIG } from '../../constants/app.constants';
 import './AdminCustomers.css';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
@@ -24,7 +25,7 @@ const NotesEditor: React.FC<{
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customerId}/notes`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customerId}/notes`,
         {
           method: 'PATCH',
           headers: {
@@ -113,7 +114,7 @@ const EditCustomerModal: React.FC<{
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customer.id}`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customer.id}`,
         {
           method: 'PATCH',
           headers: {
@@ -245,7 +246,7 @@ const AddVehicleModal: React.FC<{
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customerId}/vehicles`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customerId}/vehicles`,
         {
           method: 'POST',
           headers: {
@@ -391,7 +392,7 @@ const EditVehicleModal: React.FC<{
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customerId}/vehicles/${vehicle.id}`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customerId}/vehicles/${vehicle.id}`,
         {
           method: 'PATCH',
           headers: {
@@ -590,7 +591,7 @@ const AdminCustomers: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/admin/customers', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/admin/customers`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -616,7 +617,7 @@ const AdminCustomers: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customerId}`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -674,7 +675,7 @@ const AdminCustomers: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${customerToDelete}`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${customerToDelete}`,
         {
           method: 'DELETE',
           headers: {
@@ -713,7 +714,7 @@ const AdminCustomers: React.FC = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/admin/customers/${selectedCustomer.id}/vehicles/${vehicleId}`,
+        `${API_CONFIG.BASE_URL}/admin/customers/${selectedCustomer.id}/vehicles/${vehicleId}`,
         {
           method: 'DELETE',
           headers: {
@@ -1455,7 +1456,7 @@ const AdminCustomers: React.FC = () => {
                 try {
                   const token = localStorage.getItem('authToken');
                   const response = await fetch(
-                    'http://localhost:3001/admin/customers',
+                    `${API_CONFIG.BASE_URL}/admin/customers`,
                     {
                       method: 'POST',
                       headers: {

@@ -13,90 +13,299 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonChip,
-  IonModal,
   IonButton,
   IonSpinner,
+  IonModal,
+  IonInput,
+  IonTextarea,
+  IonSelect,
+  IonSelectOption,
   useIonAlert,
   useIonToast,
+  IonButtons,
+  IonTitle,
 } from '@ionic/react';
-import { add, timeOutline, personOutline, calendarOutline } from 'ionicons/icons';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { add, chevronBackOutline, chevronForwardOutline, calendarOutline, closeOutline } from 'ionicons/icons';
 import { appointmentService, Appointment } from '../services/api';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './Planning.css';
 
-const locales = {
-  'fr': fr,
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
-
-const formats = {
-  timeGutterFormat: (date: Date, culture: any, localizer: any) => 
-    localizer.format(date, 'HH\'H\'mm', culture),
-  eventTimeRangeFormat: () => "", // Hide default time range to avoid duplication
-  agendaTimeRangeFormat: ({ start, end }: any, culture: any, localizer: any) =>
-    localizer.format(start, 'HH\'H\'mm', culture) + ' - ' + localizer.format(end, 'HH\'H\'mm', culture),
-  dayHeaderFormat: (date: Date, culture: any, localizer: any) =>
-    localizer.format(date, 'EEEE d MMMM yyyy', culture),
-};
-
-const CustomEvent = ({ event }: { event: any }) => (
-  <div className="custom-event-content">
-    <div className="event-time">{format(event.start, 'HH:mm')}</div>
-    <div className="event-title">{event.resource.customerName}</div>
-    <div className="event-vehicle">{event.resource.vehicleBrand} {event.resource.vehicleModel}</div>
-  </div>
-);
+interface TimeSlot {
+  hour: number;
+  minute: number;
+  display: string;
+}
 
 const Planning: React.FC = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [weekDays, setWeekDays] = useState<Date[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string } | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    appointmentDate: new Date().toISOString().split('T')[0],
-    appointmentTime: '09:00',
+    licensePlate: '',
     vehicleType: 'Voiture',
     vehicleBrand: '',
     vehicleModel: '',
-    vehicleRegistration: '',
     fuelType: 'Essence',
+    appointmentDate: '',
+    source: 'manual',
     notes: '',
   });
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState<any | null>(null);
   
   const [presentAlert] = useIonAlert();
   const [presentToast] = useIonToast();
 
-  const loadAppointments = useCallback(async () => {
+  // Générer les créneaux horaires de 7h à 19h par tranche de 15 minutes
+  const timeSlots: TimeSlot[] = [];
+  for (let hour = 7; hour <= 18; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      if (hour === 18 && minute > 30) break;
+      timeSlots.push({
+        hour,
+        minute,
+        display: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+      });
+    }
+  }
+
+  useEffect(() => {
+    generateWeekDays();
+  }, [weekOffset]);
+
+  useEffect(() => {
+    if (weekDays.length === 7) {
+      loadAppointments();
+    }
+  }, [weekDays]);
+
+  const generateWeekDays = () => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const diff = currentDay === 0 ? -6 : 1 - currentDay;
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diff + (weekOffset * 7));
+    monday.setHours(0, 0, 0, 0);
+
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      days.push(day);
+    }
+    setWeekDays(days);
+  };
+
+  const toLocalDateString = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const loadAppointments = async () => {
     try {
       setLoading(true);
+      const startDate = weekDays.length > 0 ? toLocalDateString(weekDays[0]) : '';
+      const endDate = weekDays.length > 0 ? toLocalDateString(weekDays[6]) : '';
+      
       const data = await appointmentService.getAll();
-      const parsedData = data.map((evt: any) => ({
-        ...evt,
-        start: new Date(evt.start),
-        end: new Date(evt.end),
-      }));
-      setAppointments(parsedData);
+      
+      // Filtrer les rendez-vous de la semaine
+      const weekAppointments = data.filter((apt: any) => {
+        const aptDate = toLocalDateString(new Date(apt.appointmentDate));
+        return aptDate >= startDate && aptDate <= endDate;
+      });
+      
+      setAppointments(weekAppointments);
+    } catch (error) {
+      console.error('Erreur lors du chargement des rendez-vous:', error);
+      presentToast({
+        message: 'Erreur lors du chargement des rendez-vous',
+        duration: 2000,
+        color: 'danger',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (date: Date): string => {
+    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    return `${days[date.getDay()]} ${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]}`;
+  };
+
+  const getAppointmentsForSlot = (date: Date, timeSlot: TimeSlot): any[] => {
+    const dateStr = toLocalDateString(date);
+    
+    return appointments.filter(apt => {
+      if (!apt.appointmentDate || !apt.appointmentTime) return false;
+      
+      const aptDate = toLocalDateString(new Date(apt.appointmentDate));
+      const [aptHour, aptMinute] = apt.appointmentTime.split(':').map(Number);
+      
+      return aptDate === dateStr && aptHour === timeSlot.hour && aptMinute === timeSlot.minute;
+    });
+  };
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'confirmed':
+      case 'completed':
+        return '#90EE90';
+      case 'pending':
+      case 'pending_verification':
+        return '#FFD700';
+      case 'cancelled':
+        return '#FFB6C1';
+      default:
+        return '#E0E0E0';
+    }
+  };
+
+  const handleSlotClick = (date: Date, timeSlot: TimeSlot) => {
+    const slotAppointments = getAppointmentsForSlot(date, timeSlot);
+    
+    if (slotAppointments.length > 0) {
+      handleAppointmentClick(slotAppointments[0]);
+    } else {
+      openCreateModal(date, timeSlot.display);
+    }
+  };
+
+  const openCreateModal = (date: Date, time: string) => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      licensePlate: '',
+      vehicleType: 'Voiture',
+      vehicleBrand: '',
+      vehicleModel: '',
+      fuelType: 'Essence',
+      appointmentDate: toLocalDateString(date),
+      source: 'manual',
+      notes: '',
+    });
+    setSelectedSlot({ date, time });
+    setShowCreateModal(true);
+    setFormError('');
+  };
+
+  const handleAppointmentClick = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setEditFormData(appointment);
+    setEditMode(false);
+    setShowModal(true);
+  };
+
+  const handleCreateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSlot) return;
+
+    setFormLoading(true);
+    setFormError('');
+
+    try {
+      await appointmentService.create({
+        ...formData,
+        selectedDate: formData.appointmentDate,
+        selectedTime: selectedSlot.time,
+      });
+
+      setShowCreateModal(false);
+      loadAppointments();
+      presentToast({
+        message: '✅ Rendez-vous créé avec succès',
+        duration: 2000,
+        color: 'success',
+      });
+    } catch (error: any) {
+      setFormError(error.response?.data?.message || 'Erreur de connexion au serveur');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editFormData) return;
+
+    setFormLoading(true);
+    setFormError('');
+
+    try {
+      await appointmentService.updateStatus(editFormData.id, editFormData.status);
+      
+      setShowModal(false);
+      setEditMode(false);
+      loadAppointments();
+      presentToast({
+        message: '✅ Rendez-vous modifié avec succès',
+        duration: 2000,
+        color: 'success',
+      });
+    } catch (error) {
+      setFormError('Erreur lors de la modification du rendez-vous');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteAppointment = async () => {
+    if (!selectedAppointment) return;
+    
+    presentAlert({
+      header: 'Confirmation',
+      message: `Êtes-vous sûr de vouloir supprimer le rendez-vous #${selectedAppointment.id} ?`,
+      buttons: [
+        { text: 'Annuler', role: 'cancel' },
+        {
+          text: 'Supprimer',
+          role: 'destructive',
+          handler: async () => {
+            try {
+              setFormLoading(true);
+              await appointmentService.delete(selectedAppointment.id);
+              
+              setShowModal(false);
+              loadAppointments();
+              presentToast({
+                message: '🗑️ Rendez-vous supprimé avec succès',
+                duration: 2000,
+                color: 'success',
+              });
+            } catch (error) {
+              presentToast({
+                message: 'Erreur lors de la suppression',
+                duration: 2000,
+                color: 'danger',
+              });
+            } finally {
+              setFormLoading(false);
+            }
+          }
+        }
+      ]
+    });
+  };
+
+  const handleRefresh = (event: CustomEvent) => {
+    loadAppointments().then(() => event.detail.complete());
+  };
     } catch (error) {
       console.error('Erreur lors du chargement des rendez-vous:', error);
       presentToast({

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { API_CONFIG } from '../constants/app.constants';
 import './ClientSearchSuggestion.css';
 
 interface Vehicle {
@@ -78,7 +79,7 @@ const ClientSearchSuggestion: React.FC<ClientSearchSuggestionProps> = ({
 
         const token = localStorage.getItem('authToken');
         const response = await fetch(
-          `http://localhost:3001/admin/customers/search-by-name?${params}`,
+          `${API_CONFIG.BASE_URL}/admin/customers/search-by-name?${params}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

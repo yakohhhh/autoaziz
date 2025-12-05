@@ -16,7 +16,7 @@ import { useEffect, useState, useCallback } from 'react';
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Planning from './pages/Planning';
+import PlanningNew from './pages/PlanningNew';
 import Customers from './pages/Customers';
 import { authService } from './services/api';
 
@@ -151,7 +151,7 @@ const App: React.FC = () => {
               <Dashboard />
             </Route>
             <Route exact path="/planning">
-              <Planning />
+              <PlanningNew />
             </Route>
             <Route exact path="/customers">
               <Customers />

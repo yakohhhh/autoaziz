@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/locale/fr';
+import { API_CONFIG } from '../../constants/app.constants';
 import './WeeklyCalendar.css';
 
 // Configuration de dayjs
@@ -49,7 +50,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     const scrollPosition = window.scrollY;
     try {
       const response = await axios.get(
-        `http://localhost:3001/appointments/available-slots?weekOffset=${weekOffset}`
+        `${API_CONFIG.BASE_URL}/appointments/available-slots?weekOffset=${weekOffset}`
       );
       setWeekData(response.data.days);
       setWeekRange({
