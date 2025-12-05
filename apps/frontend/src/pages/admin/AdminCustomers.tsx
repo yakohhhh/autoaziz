@@ -1154,15 +1154,7 @@ const AdminCustomers: React.FC = () => {
                       </h3>
                       <button
                         onClick={() => setShowAddVehicleModal(true)}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          background: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem',
-                        }}
+                        className='btn-add-vehicle'
                       >
                         ➕ Ajouter un véhicule
                       </button>
@@ -1261,28 +1253,13 @@ const AdminCustomers: React.FC = () => {
                                   </div>
                                 )}
                               </div>
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  gap: '0.5rem',
-                                  marginTop: '0.75rem',
-                                }}
-                              >
+                              <div className='vehicle-actions'>
                                 <button
                                   onClick={() => {
                                     setVehicleToEdit(vehicle);
                                     setShowEditVehicleModal(true);
                                   }}
-                                  style={{
-                                    flex: 1,
-                                    padding: '0.4rem',
-                                    background: '#2196F3',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.85rem',
-                                  }}
+                                  className='btn-edit-vehicle'
                                 >
                                   ✏️ Modifier
                                 </button>
@@ -1296,16 +1273,7 @@ const AdminCustomers: React.FC = () => {
                                       handleDeleteVehicle(vehicle.id);
                                     }
                                   }}
-                                  style={{
-                                    flex: 1,
-                                    padding: '0.4rem',
-                                    background: '#f44336',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.85rem',
-                                  }}
+                                  className='btn-delete-vehicle'
                                 >
                                   🗑️ Supprimer
                                 </button>
